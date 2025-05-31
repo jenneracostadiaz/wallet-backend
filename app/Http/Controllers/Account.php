@@ -10,6 +10,8 @@ class Account extends Controller
 {
     public function index()
     {
-        return Inertia::render('accounts/index');
+        return Inertia::render('accounts/index',[
+            'accounts' => auth()->user()->accounts
+        ]);
     }
 }
