@@ -88,7 +88,7 @@ class CurrencySeeder extends Seeder
         ];
 
         foreach ($currencies as $currency) {
-            Currency::updateOrCreate(
+            Currency::query()->updateOrCreate(
                 ['code' => $currency['code']],
                 $currency
             );

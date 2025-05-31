@@ -33,12 +33,12 @@ class CategorySeeder extends Seeder
             ['name' => 'Salary', 'color' => '#4CAF50', 'icon' => 'work', 'order' => 1],
             ['name' => 'Freelance', 'color' => '#2196F3', 'icon' => 'computer', 'order' => 2],
             ['name' => 'Investments', 'color' => '#9C27B0', 'icon' => 'trending_up', 'order' => 3],
-            ['name' => 'Gifts', 'color' => '#E91E63', 'icon' => 'card_giftcard', 'order' => 4],
+            ['name' => 'Gifts', 'color' => '#E91E63', 'icon' => 'card_giftCard', 'order' => 4],
             ['name' => 'Other Income', 'color' => '#607D8B', 'icon' => 'attach_money', 'order' => 5],
         ];
 
         foreach ($incomeCategories as $category) {
-            Category::create([
+            Category::query()->create([
                 'name' => $category['name'],
                 'type' => 'income',
                 'color' => $category['color'],
@@ -70,7 +70,7 @@ class CategorySeeder extends Seeder
         ];
 
         foreach ($expenseCategories as $category) {
-            Category::create([
+            Category::query()->create([
                 'name' => $category['name'],
                 'type' => 'expense',
                 'color' => $category['color'],

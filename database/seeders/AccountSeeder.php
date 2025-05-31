@@ -28,11 +28,11 @@ class AccountSeeder extends Seeder
     private function createDefaultAccounts(User $user): void
     {
         // Get currency IDs
-        $usdCurrency = Currency::where('code', 'USD')->first();
+        $usdCurrency = Currency::query()->where('code', 'USD')->first();
 
         if (!$usdCurrency) {
-            // If USD currency doesn't exist, create it
-            $usdCurrency = Currency::create([
+            // If the USD currency doesn't exist, create it
+            $usdCurrency = Currency::query()->create([
                 'code' => 'USD',
                 'name' => 'US Dollar',
                 'symbol' => '$',
@@ -86,7 +86,7 @@ class AccountSeeder extends Seeder
                 'order' => $accountData['order'],
             ]);
 
-            // Set initial balance and save
+            // Set the initial balance and save
             $account->setInitialBalance($accountData['balance'])->save();
         }
     }

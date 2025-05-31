@@ -28,15 +28,15 @@ class TransactionSeeder extends Seeder
      */
     private function createTransactionsForUser(User $user): void
     {
-        $accounts = Account::where('user_id', $user->id)->get();
-        $incomeCategories = Category::where('user_id', $user->id)
+        $accounts = Account::query()->where('user_id', $user->id)->get();
+        $incomeCategories = Category::query()->where('user_id', $user->id)
             ->where('type', 'income')
             ->get();
-        $expenseCategories = Category::where('user_id', $user->id)
+        $expenseCategories = Category::query()->where('user_id', $user->id)
             ->where('type', 'expense')
             ->get();
 
-        // Skip if user doesn't have accounts or categories
+        // Skip if the user doesn't have accounts or categories
         if ($accounts->isEmpty() || $incomeCategories->isEmpty() || $expenseCategories->isEmpty()) {
             return;
         }
@@ -65,7 +65,7 @@ class TransactionSeeder extends Seeder
         for ($i = 0; $i < 3; $i++) {
             $date = Carbon::now()->subMonths($i)->startOfMonth()->addDays(rand(1, 5));
 
-            Transaction::create([
+            Transaction::query()->create([
                 'amount' => rand(3000, 5000),
                 'description' => 'Monthly Salary',
                 'date' => $date,
@@ -81,7 +81,7 @@ class TransactionSeeder extends Seeder
             $date = Carbon::now()->subDays(rand(1, 90));
             $category = $incomeCategories->random();
 
-            Transaction::create([
+            Transaction::query()->create([
                 'amount' => rand(50, 1000),
                 'description' => 'Additional income - ' . $category->name,
                 'date' => $date,
@@ -100,7 +100,7 @@ class TransactionSeeder extends Seeder
     {
         // Create expenses for each account
         foreach ($accounts as $account) {
-            // Skip accounts with negative balance
+            // Skip accounts with a negative balance
             if ($account->balance < 0) {
                 continue;
             }
@@ -113,7 +113,7 @@ class TransactionSeeder extends Seeder
                 $category = $expenseCategories->random();
                 $amount = rand(5, 200);
 
-                Transaction::create([
+                Transaction::query()->create([
                     'amount' => $amount,
                     'description' => $category->name . ' expense',
                     'date' => $date,
@@ -131,7 +131,7 @@ class TransactionSeeder extends Seeder
      */
     private function createTransferTransactions(User $user, $accounts): void
     {
-        // Skip if user doesn't have at least 2 accounts
+        // Skip if the user doesn't have at least 2 accounts
         if ($accounts->count() < 2) {
             return;
         }
@@ -145,7 +145,7 @@ class TransactionSeeder extends Seeder
             $date = Carbon::now()->subDays(rand(1, 90));
             $amount = rand(50, 500);
 
-            Transaction::create([
+            Transaction::query()->create([
                 'amount' => $amount,
                 'description' => 'Transfer from ' . $fromAccount->name . ' to ' . $toAccount->name,
                 'date' => $date,

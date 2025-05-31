@@ -14,11 +14,11 @@ class DatabaseSeeder extends Seeder
     {
         // Call seeders in the correct order
         $this->call([
-            UserSeeder::class,      // First create users
+            UserSeeder::class,      // First, create users
             CurrencySeeder::class,  // Then create currencies
             CategorySeeder::class,  // Then create categories
             AccountSeeder::class,   // Then create accounts
-            TransactionSeeder::class, // Finally create transactions
+            TransactionSeeder::class, // Finally, create transactions
         ]);
     }
 }
