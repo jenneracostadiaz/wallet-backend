@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('type'); // checking, savings, credit card, cash, etc.
             $table->decimal('balance', 10, 2)->default(0);
-            $table->string('currency', 3)->default('USD');
+            $table->foreignId('currency_id')->constrained();
             $table->text('description')->nullable();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();

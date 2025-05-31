@@ -20,7 +20,6 @@ class Account extends Model
         'name',
         'type',
         'balance',
-        'currency',
         'currency_id',
         'description',
         'user_id',
