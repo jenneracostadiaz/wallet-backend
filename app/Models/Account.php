@@ -34,6 +34,18 @@ class Account extends Model
     ];
 
     /**
+     * Set the initial balance for the account.
+     *
+     * @param float $amount
+     * @return self
+     */
+    public function setInitialBalance(float $amount): self
+    {
+        $this->balance = $amount;
+        return $this;
+    }
+
+    /**
      * Get the user that owns the account.
      */
     public function user()
