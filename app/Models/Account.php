@@ -23,6 +23,7 @@ class Account extends Model
         'currency_id',
         'description',
         'user_id',
+        'order',
     ];
 
     /**

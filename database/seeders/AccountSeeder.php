@@ -48,6 +48,7 @@ class AccountSeeder extends Seeder
                 'balance' => 500.00,
                 'currency_id' => $usdCurrency->id,
                 'description' => 'Cash on hand',
+                'order' => 1,
             ],
             [
                 'name' => 'Checking Account',
@@ -55,6 +56,7 @@ class AccountSeeder extends Seeder
                 'balance' => 2500.75,
                 'currency_id' => $usdCurrency->id,
                 'description' => 'Primary checking account',
+                'order' => 2,
             ],
             [
                 'name' => 'Savings Account',
@@ -62,6 +64,7 @@ class AccountSeeder extends Seeder
                 'balance' => 10000.00,
                 'currency_id' => $usdCurrency->id,
                 'description' => 'Emergency fund and savings',
+                'order' => 3,
             ],
             [
                 'name' => 'Credit Card',
@@ -69,6 +72,7 @@ class AccountSeeder extends Seeder
                 'balance' => -750.50,
                 'currency_id' => $usdCurrency->id,
                 'description' => 'Primary credit card',
+                'order' => 4,
             ],
         ];
 
@@ -79,6 +83,7 @@ class AccountSeeder extends Seeder
                 'currency_id' => $accountData['currency_id'],
                 'description' => $accountData['description'],
                 'user_id' => $user->id,
+                'order' => $accountData['order'],
             ]);
 
             // Set initial balance and save

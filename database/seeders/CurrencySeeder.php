@@ -19,6 +19,7 @@ class CurrencySeeder extends Seeder
                 'symbol' => '$',
                 'decimal_places' => 2,
                 'is_active' => true,
+                'order' => 1,
             ],
             [
                 'code' => 'EUR',
@@ -26,6 +27,15 @@ class CurrencySeeder extends Seeder
                 'symbol' => '€',
                 'decimal_places' => 2,
                 'is_active' => true,
+                'order' => 2,
+            ],
+            [
+                'code' => 'PEN',
+                'name' => 'Nuevo Sol',
+                'symbol' => 'S/',
+                'decimal_places' => 2,
+                'is_active' => true,
+                'order' => 3,
             ],
             [
                 'code' => 'GBP',
@@ -33,6 +43,7 @@ class CurrencySeeder extends Seeder
                 'symbol' => '£',
                 'decimal_places' => 2,
                 'is_active' => true,
+                'order' => 4,
             ],
             [
                 'code' => 'JPY',
@@ -40,6 +51,7 @@ class CurrencySeeder extends Seeder
                 'symbol' => '¥',
                 'decimal_places' => 0,
                 'is_active' => true,
+                'order' => 5,
             ],
             [
                 'code' => 'CAD',
@@ -47,6 +59,7 @@ class CurrencySeeder extends Seeder
                 'symbol' => 'C$',
                 'decimal_places' => 2,
                 'is_active' => true,
+                'order' => 6,
             ],
             [
                 'code' => 'AUD',
@@ -54,6 +67,7 @@ class CurrencySeeder extends Seeder
                 'symbol' => 'A$',
                 'decimal_places' => 2,
                 'is_active' => true,
+                'order' => 7,
             ],
             [
                 'code' => 'CHF',
@@ -61,6 +75,7 @@ class CurrencySeeder extends Seeder
                 'symbol' => 'Fr',
                 'decimal_places' => 2,
                 'is_active' => true,
+                'order' => 8,
             ],
             [
                 'code' => 'CNY',
@@ -68,6 +83,7 @@ class CurrencySeeder extends Seeder
                 'symbol' => '¥',
                 'decimal_places' => 2,
                 'is_active' => true,
+                'order' => 9,
             ],
         ];
 

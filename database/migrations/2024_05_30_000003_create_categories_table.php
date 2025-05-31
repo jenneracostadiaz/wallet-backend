@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('icon')->nullable();
             $table->foreignId('parent_id')->nullable()->constrained('categories')->onDelete('set null');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->unsignedInteger('order')->default(0);
             $table->timestamps();
         });
     }

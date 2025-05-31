@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('currency_id')->constrained();
             $table->text('description')->nullable();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->unsignedInteger('order')->default(0);
             $table->timestamps();
         });
     }

@@ -23,6 +23,7 @@ class Category extends Model
         'icon',
         'parent_id',
         'user_id',
+        'order',
     ];
 
     /**

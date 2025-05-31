@@ -21,6 +21,7 @@ class Currency extends Model
         'symbol',
         'decimal_places',
         'is_active',
+        'order',
     ];
 
     /**
