@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AccountRequest;
 use App\Models\Account;
 use App\Models\Currency;
 use Illuminate\Http\RedirectResponse;
@@ -52,15 +53,8 @@ class AccountController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(AccountRequest $request)
     {
-        $request->validate([
-            'name' => 'required',
-            'type' => 'required',
-			'currency' => ['required', 'exists:currencies,id'],
-			'balance' => 'required',
-            'description' => 'nullable',
-        ]);
 
         auth()->user()->accounts()->create([
             'name' => $request->name,
@@ -104,15 +98,8 @@ class AccountController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Account $account)
+    public function update(AccountRequest $request, Account $account)
     {
-        $request->validate([
-            'name' => 'required',
-            'type' => 'required',
-			'currency' => ['required', 'exists:currencies,id'],
-            'balance' => 'required',
-            'description' => 'nullable',
-        ]);
 
         $account->update([
             'name' => $request->name,
