@@ -57,8 +57,8 @@ class AccountController extends Controller
         $request->validate([
             'name' => 'required',
             'type' => 'required',
-            'currency' => 'required',
-            'balance' => 'required',
+			'currency' => ['required', 'exists:currencies,id'],
+			'balance' => 'required',
             'description' => 'nullable',
         ]);
 
@@ -109,7 +109,7 @@ class AccountController extends Controller
         $request->validate([
             'name' => 'required',
             'type' => 'required',
-            'currency' => 'required',
+			'currency' => ['required', 'exists:currencies,id'],
             'balance' => 'required',
             'description' => 'nullable',
         ]);
