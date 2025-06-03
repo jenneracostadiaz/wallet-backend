@@ -9,6 +9,7 @@ export type Account = {
     order: string,
     created_at: string,
     updated_at: string,
+    currency: Currency,
 }
 
 export type Currency = {

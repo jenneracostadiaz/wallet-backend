@@ -17,7 +17,7 @@ class AccountController extends Controller
     public function index()
     {
         return Inertia::render('accounts/index',[
-            'accounts' => auth()->user()->accounts()->get()
+            'accounts' => auth()->user()->accounts()->with('currency')->get()
         ]);
     }
 

@@ -3,6 +3,7 @@ import { getAccountTypeColor } from '@/hooks/use-account-types';
 import { Pencil } from 'lucide-react';
 import DeleteAccountButton from './delete-account-button';
 import { Link } from '@inertiajs/react';
+import AccountBalance from '@/pages/accounts/components/account-balance';
 
 interface AccountItemProps {
     account: Account;
@@ -18,7 +19,7 @@ export default function AccountItem({ account }: AccountItemProps) {
                 {account.description && <p className="text-muted-foreground text-sm">{account.description}</p>}
             </span>
             <span className="">
-                <p className="text-muted-foreground text-sm">{account.balance}</p>
+                <AccountBalance currency={account.currency} balance={account.balance} />
             </span>
             <span className="flex items-center justify-end gap-2">
                 <Link
