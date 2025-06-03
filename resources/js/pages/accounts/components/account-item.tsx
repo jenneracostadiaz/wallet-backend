@@ -2,6 +2,7 @@ import { Account } from '@/types/accounts';
 import { getAccountTypeColor } from '@/hooks/use-account-types';
 import { Pencil } from 'lucide-react';
 import DeleteAccountButton from './delete-account-button';
+import { Link } from '@inertiajs/react';
 
 interface AccountItemProps {
     account: Account;
@@ -20,9 +21,12 @@ export default function AccountItem({ account }: AccountItemProps) {
                 <p className="text-muted-foreground text-sm">{account.balance}</p>
             </span>
             <span className="flex items-center justify-end gap-2">
-                <button className="bg-teal-400 dark:bg-teal-800 hover:bg-teal-200 p-1 rounded cursor-pointer">
+                <Link
+                    href={route('accounts.edit', account.id)}
+                    className="bg-teal-400 dark:bg-teal-800 hover:bg-teal-200 p-1 rounded cursor-pointer inline-flex"
+                >
                     <Pencil size={12} />
-                </button>
+                </Link>
                 <DeleteAccountButton accountId={account.id} />
             </span>
         </li>

@@ -59,7 +59,7 @@ class AccountController extends Controller
             'type' => 'required',
             'currency' => 'required',
             'balance' => 'required',
-            'description' => 'required',
+            'description' => 'nullable',
         ]);
 
         auth()->user()->accounts()->create([
@@ -75,17 +75,54 @@ class AccountController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Account $account)
     {
-        //
+        return Inertia::render('accounts/edit',[
+            'account' => $account,
+            'currencies' => Currency::all(),
+            'types' => [
+                [
+                    'type' => 'checking',
+                    'name' => 'Checking',
+                ],
+                [
+                    'type' => 'savings',
+                    'name' => 'Savings',
+                ],
+                [
+                    'type' => 'credit_card',
+                    'name' => 'Credit Card',
+                ],
+                [
+                    'type' => 'cash',
+                    'name' => 'Cash',
+                ],
+            ],
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Account $account)
     {
-        //
+        $request->validate([
+            'name' => 'required',
+            'type' => 'required',
+            'currency' => 'required',
+            'balance' => 'required',
+            'description' => 'nullable',
+        ]);
+
+        $account->update([
+            'name' => $request->name,
+            'type' => $request->type,
+            'currency_id' => $request->currency,
+            'balance' => $request->balance,
+            'description' => $request->description
+        ]);
+
+        return redirect()->route('accounts.index')->with('success', 'Account updated successfully!');
     }
 
     /**
