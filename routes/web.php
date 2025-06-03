@@ -13,7 +13,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 
-    Route::resource('accounts', AccountController::class);
+    Route::resource('accounts', AccountController::class)->except('show');
 });
 
 require __DIR__.'/settings.php';
