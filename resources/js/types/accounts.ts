@@ -11,3 +11,9 @@ export type Account = {
     updated_at: string,
 }
 
+export type Currency = {
+    id: number,
+    code: string,
+    name: string,
+    symbol: string,
+}
