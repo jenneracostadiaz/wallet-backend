@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Account;
+use App\Http\Controllers\AccountController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -13,7 +13,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 
-    Route::get('accounts', [Account::class, 'index'])->name('accounts.index');
+    Route::resource('accounts', AccountController::class);
 });
 
 require __DIR__.'/settings.php';
