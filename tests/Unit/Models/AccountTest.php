@@ -22,7 +22,7 @@ test('can set initial balance', function () {
 
     $account->setInitialBalance(1000.50);
 
-    expect($account->balance)->toBe(1000.50);
+    expect($account->balance)->toEqual(1000.50);
 });
 
 test('belongs to a user', function () {
