@@ -33,3 +33,17 @@ test('belongs to a user', function () {
         ->toBeInstanceOf(User::class)
         ->and($account->user->id)->toBe($user->id);
 });
+
+test('belongs to a currency', function () {
+    $currency = Currency::factory()->create();
+    $account = Account::factory()->create(['currency_id' => $currency->id]);
+
+    expect($account->currency)
+        ->toBeInstanceOf(Currency::class)
+        ->and($account->currency->id)->toBe($currency->id);
+});
+
+test('balance is cast to decimal with two decimal places', function () {
+    $account = Account::factory()->create(['balance' => 100]);
+    expect($account->balance)->toEqual('100.00');
+});
