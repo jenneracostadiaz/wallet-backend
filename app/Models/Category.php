@@ -16,7 +16,7 @@ class Category extends Model
      */
     protected $fillable = [
         'name',
-        'type', // income, expense
+        'type', // income, expense, transfer
         'color',
         'icon',
         'parent_id',

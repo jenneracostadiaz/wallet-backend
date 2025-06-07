@@ -22,7 +22,14 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('categories/create',[
+            'categories' => auth()->user()->categories()->whereNull('parent_id')->get(),
+            'types' => [
+                ['type' => 'income', 'name' => 'Income'],
+                ['type' => 'expense', 'name' => 'Expense'],
+                ['type' => 'transfer', 'name' => 'Transfer'],
+            ],
+        ]);
     }
 
     /**
