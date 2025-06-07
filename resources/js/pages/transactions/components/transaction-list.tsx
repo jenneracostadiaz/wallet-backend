@@ -7,7 +7,7 @@ interface TransactionListProps {
 
 export default function TransactionList({ transactions }: TransactionListProps) {
     return (
-        <ul className="grid gap-4 grid-cols-1">
+        <ul className="grid grid-cols-1 gap-4">
             {transactions.map((transaction: Transaction) => (
                 <TransactionItem key={transaction.id} transaction={transaction} />
             ))}

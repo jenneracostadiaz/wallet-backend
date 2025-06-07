@@ -15,5 +15,5 @@ export interface Transaction {
     updated_at: string;
     account?: Account;
     category?: Category;
-    toAccount?: Account;
+    to_account?: Account;
 }

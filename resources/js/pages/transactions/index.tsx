@@ -18,6 +18,7 @@ interface IndexProps {
 }
 
 export default function Index({transactions}: IndexProps) {
+    console.log('Transactions:', transactions);
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Transactions" />

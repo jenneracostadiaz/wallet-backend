@@ -17,4 +17,5 @@ export type Currency = {
     code: string,
     name: string,
     symbol: string,
+    decimal_places?: number; // Added decimal_places as an optional property
 }

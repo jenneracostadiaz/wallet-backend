@@ -3,6 +3,7 @@ import { ArrowRight, Pencil } from 'lucide-react';
 import DeleteTransactionButton from './delete-transaction-button';
 import { Link } from '@inertiajs/react';
 import { format } from 'date-fns';
+import { Currency } from '@/types/accounts'; // Added import
 
 interface TransactionItemProps {
     transaction: Transaction;
@@ -22,12 +23,12 @@ export default function TransactionItem({ transaction }: TransactionItemProps) {
         }
     };
 
-    const formatAmount = (amount: number, type: string, currency: any) => {
+    const formatAmount = (amount: number, type: string, currency: Currency | undefined) => { // Changed 'any' to 'Currency | undefined'
         const formattedAmount = new Intl.NumberFormat('en-US', {
             style: 'currency',
             currency: currency?.code || 'USD',
-            minimumFractionDigits: currency?.decimal_places || 2,
-            maximumFractionDigits: currency?.decimal_places || 2,
+            minimumFractionDigits: currency?.decimal_places || 2, // ESLint error here before, should be fixed by using Currency type if decimal_places exists
+            maximumFractionDigits: currency?.decimal_places || 2, // ESLint error here before, should be fixed by using Currency type if decimal_places exists
         }).format(amount);
 
         return type === 'expense' ? `-${formattedAmount}` : formattedAmount;
@@ -61,9 +62,12 @@ export default function TransactionItem({ transaction }: TransactionItemProps) {
 
     const getCurrencyWarning = (transaction: Transaction) => {
         if (transaction.type === 'transfer' &&
-            transaction.account?.currency?.code !== transaction.toAccount?.currency?.code) {
+            transaction.account?.currency?.code !== transaction.to_account?.currency?.code) {
             return (
-                <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                <span
+                    className="text-xs text-amber-600 dark:text-amber-400 font-medium" // ml-2 REMOVED
+                    title="Esta transacción involucra diferentes divisas entre las cuentas de origen y destino."
+                >
                     ⚠️ Multi-currency
                 </span>
             );
@@ -74,7 +78,10 @@ export default function TransactionItem({ transaction }: TransactionItemProps) {
     return (
         <li className={`flex items-center gap-4 relative border ${getTransactionTypeColor(transaction.type)} rounded-xl py-4 px-4 transition-all hover:shadow-sm`}>
             {/* Transaction Icon */}
-            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-white dark:bg-gray-800 border flex items-center justify-center text-lg">
+            <div
+                className="flex-shrink-0 w-10 h-10 rounded-full bg-white dark:bg-gray-800 border flex items-center justify-center text-lg"
+                title={transaction.category?.name || `${transaction.type.charAt(0).toUpperCase()}${transaction.type.slice(1)}`}
+            >
                 {transaction.category?.icon || getTransactionIcon(transaction.type)}
             </div>
 
@@ -98,9 +105,10 @@ export default function TransactionItem({ transaction }: TransactionItemProps) {
                                     </span>
                                     <ArrowRight size={12} className="flex-shrink-0" />
                                     <span className="truncate">
-                                        {transaction.toAccount?.name}
-                                        <span className="text-xs ml-1">({transaction.toAccount?.currency?.code})</span>
+                                        {transaction.to_account?.name}
+                                        <span className="text-xs ml-1">({transaction.to_account?.currency?.code})</span>
                                     </span>
+                                    {getCurrencyWarning(transaction)}
                                 </div>
                             ) : (
                                 <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
@@ -108,22 +116,27 @@ export default function TransactionItem({ transaction }: TransactionItemProps) {
                                         {transaction.account?.name}
                                         <span className="text-xs ml-1">({transaction.account?.currency?.code})</span>
                                     </span>
-                                    {getCurrencyWarning(transaction)}
                                 </div>
                             )}
                         </div>
 
                     </div>
 
-                    <p className={`mt-2 text-lg font-semibold ${getAmountTextColor(transaction.type)}`}>
-                        {formatAmount(transaction.amount, transaction.type, transaction.account?.currency)}
-                    </p>
-
-                    <div className="flex items-center gap-2">
-                        <Link href={route('transactions.edit', transaction.id)} className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
-                            <Pencil size={16} />
-                        </Link>
-                        <DeleteTransactionButton transactionId={transaction.id} />
+                    {/* Right side: Amount and Actions */}
+                    <div className="ml-4 flex flex-col items-end flex-shrink-0">
+                        <p className={`text-lg font-semibold ${getAmountTextColor(transaction.type)}`}> {/* mt-2 REMOVED */}
+                            {formatAmount(transaction.amount, transaction.type, transaction.account?.currency)}
+                        </p>
+                        <div className="mt-1 flex items-center gap-2"> {/* mt-1 ADDED */}
+                            <Link
+                                href={route('transactions.edit', transaction.id)}
+                                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                                title="Editar transacción"
+                            >
+                                <Pencil size={16} />
+                            </Link>
+                            <DeleteTransactionButton transactionId={transaction.id} />
+                        </div>
                     </div>
                 </div>
             </div>
