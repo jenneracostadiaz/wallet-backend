@@ -57,4 +57,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Category::class)->orderBy('order');
     }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class)->orderBy('date', 'desc');
+    }
 }

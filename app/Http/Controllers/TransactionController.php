@@ -11,7 +11,9 @@ class TransactionController extends Controller
      */
     public function index()
     {
-        //
+        return inertia('transactions/index', [
+            'transactions' => auth()->user()->transactions()->with(['account', 'category'])->get(),
+        ]);
     }
 
     /**
