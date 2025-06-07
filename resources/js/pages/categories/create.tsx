@@ -9,7 +9,8 @@ const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Categories',
         href: '/categories',
-    },{
+    },
+    {
         title: 'Create',
         href: '/categories/create',
     },
