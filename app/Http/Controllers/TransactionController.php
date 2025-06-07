@@ -9,6 +9,13 @@ use Illuminate\Support\Facades\DB;
 
 class TransactionController extends Controller
 {
+    // Definir tipos de transacción como constantes
+    private const TRANSACTION_TYPES = [
+        ['value' => 'income', 'label' => 'Income'],
+        ['value' => 'expense', 'label' => 'Expense'],
+        ['value' => 'transfer', 'label' => 'Transfer'],
+    ];
+
     /**
      * Display a listing of the resource.
      */
@@ -30,20 +37,7 @@ class TransactionController extends Controller
         return inertia('transactions/create', [
             'accounts' => auth()->user()->accounts()->with('currency')->get(),
             'categories' => auth()->user()->categories()->get(),
-            'types' => [
-                [
-                    'value' => 'income',
-                    'label' => 'Income',
-                ],
-                [
-                    'value' => 'expense',
-                    'label' => 'Expense',
-                ],
-                [
-                    'value' => 'transfer',
-                    'label' => 'Transfer',
-                ],
-            ],
+            'types' => self::TRANSACTION_TYPES,
         ]);
     }
 
@@ -53,28 +47,11 @@ class TransactionController extends Controller
     public function store(TransactionRequest $request)
     {
         $validated = $request->validated();
-        $account = auth()->user()->accounts()->findOrFail($validated['account_id']);
+        $this->validateTransactionPrerequisites($validated);
 
-        if ($validated['type'] === 'transfer' && $validated['to_account_id']) {
-            // Verificar que la cuenta destino también pertenece al usuario
-            $toAccount = auth()->user()->accounts()->findOrFail($validated['to_account_id']);
-        }
-
-        if ($validated['category_id']) {
-            // Verificar que la categoría pertenece al usuario y es del tipo correcto
-            $category = auth()->user()->categories()
-                ->where('id', $validated['category_id'])
-                ->where('type', $validated['type'])
-                ->firstOrFail();
-        }
-
-        DB::transaction(function () use ($validated, $account) {
+        DB::transaction(function () use ($validated) {
             $validated['user_id'] = auth()->id();
-
-            // Crear la transacción
             $transaction = auth()->user()->transactions()->create($validated);
-
-            // Actualizar saldos de cuentas
             $this->updateAccountBalances($transaction);
         });
 
@@ -87,29 +64,13 @@ class TransactionController extends Controller
      */
     public function edit(Transaction $transaction)
     {
-        // Verificar que la transacción pertenece al usuario
-        if ($transaction->user_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->authorizeTransaction($transaction);
 
         return inertia('transactions/edit', [
             'transaction' => $transaction->load(['account.currency', 'category', 'toAccount.currency']),
             'accounts' => auth()->user()->accounts()->with('currency')->get(),
             'categories' => auth()->user()->categories()->get(),
-            'types' => [
-                [
-                    'value' => 'income',
-                    'label' => 'Income',
-                ],
-                [
-                    'value' => 'expense',
-                    'label' => 'Expense',
-                ],
-                [
-                    'value' => 'transfer',
-                    'label' => 'Transfer',
-                ],
-            ],
+            'types' => self::TRANSACTION_TYPES,
         ]);
     }
 
@@ -118,22 +79,10 @@ class TransactionController extends Controller
      */
     public function update(TransactionRequest $request, Transaction $transaction)
     {
+        $this->authorizeTransaction($transaction); // Authorize first
 
-        // Verificar que la cuenta pertenece al usuario
-        $account = auth()->user()->accounts()->findOrFail($validated['account_id']);
-
-        if ($validated['type'] === 'transfer' && $validated['to_account_id']) {
-            // Verificar que la cuenta destino también pertenece al usuario
-            $toAccount = auth()->user()->accounts()->findOrFail($validated['to_account_id']);
-        }
-
-        if ($validated['category_id']) {
-            // Verificar que la categoría pertenece al usuario y es del tipo correcto
-            $category = auth()->user()->categories()
-                ->where('id', $validated['category_id'])
-                ->where('type', $validated['type'])
-                ->firstOrFail();
-        }
+        $validated = $request->validated();
+        $this->validateTransactionPrerequisites($validated);
 
         DB::transaction(function () use ($validated, $transaction) {
             // Revertir los cambios de saldo anteriores
@@ -155,6 +104,7 @@ class TransactionController extends Controller
      */
     public function destroy(Transaction $transaction)
     {
+        $this->authorizeTransaction($transaction); // Authorize first
 
         DB::transaction(function () use ($transaction) {
             // Revertir los cambios de saldo
@@ -219,6 +169,42 @@ class TransactionController extends Controller
                     $transaction->toAccount->decrement('balance', $transaction->amount);
                 }
                 break;
+        }
+    }
+
+    private function findUserAccount($accountId)
+    {
+        return auth()->user()->accounts()->findOrFail($accountId);
+    }
+
+    private function validateCategory($categoryId, $type)
+    {
+        auth()->user()->categories()
+            ->where('id', $categoryId)
+            ->where('type', $type)
+            ->firstOrFail();
+    }
+
+    private function authorizeTransaction(Transaction $transaction)
+    {
+        if ($transaction->user_id !== auth()->id()) {
+            abort(403);
+        }
+    }
+
+    /**
+     * Validate common transaction prerequisites.
+     */
+    private function validateTransactionPrerequisites(array $validatedData): void
+    {
+        $this->findUserAccount($validatedData['account_id']);
+
+        if ($validatedData['type'] === 'transfer') {
+            $this->findUserAccount($validatedData['to_account_id']);
+        }
+
+        if ($validatedData['category_id']) {
+            $this->validateCategory($validatedData['category_id'], $validatedData['type']);
         }
     }
 }
