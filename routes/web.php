@@ -17,7 +17,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('accounts', AccountController::class)->except('show');
     Route::resource('categories', CategoryController::class)->except('show');
-    Route::resource('transactions', TransactionController::class);
+    Route::resource('transactions', TransactionController::class)->except('show');
 });
 
 require __DIR__.'/settings.php';

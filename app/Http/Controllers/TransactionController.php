@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 
 class TransactionController extends Controller
@@ -64,28 +65,28 @@ class TransactionController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        $transaction = auth()->user()->transactions()->with(['account', 'category', 'toAccount'])->findOrFail($id);
-
-        return inertia('transactions/show', [
-            'transaction' => $transaction,
-        ]);
-    }
-
-    /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Transaction $transaction)
     {
-        $transaction = auth()->user()->transactions()->findOrFail($id);
-
         return inertia('transactions/edit', [
-            'transaction' => $transaction,
+            'transaction' => $transaction->load(['account', 'category', 'toAccount']),
             'accounts' => auth()->user()->accounts()->get(),
             'categories' => auth()->user()->categories()->get(),
+            'types' => [
+                [
+                    'value' => 'income',
+                    'label' => 'Income',
+                ],
+                [
+                    'value' => 'expense',
+                    'label' => 'Expense',
+                ],
+                [
+                    'value' => 'transfer',
+                    'label' => 'Transfer',
+                ],
+            ],
         ]);
     }
 
