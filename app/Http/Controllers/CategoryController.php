@@ -53,17 +53,33 @@ class CategoryController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Category $category)
     {
-        //
+        return Inertia::render('categories/edit', [
+            'category' => $category,
+            'categories' => auth()->user()->categories()->whereNull('parent_id')->get(),
+            'types' => [
+                ['type' => 'income', 'name' => 'Income'],
+                ['type' => 'expense', 'name' => 'Expense'],
+                ['type' => 'transfer', 'name' => 'Transfer'],
+            ],
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(CategoryRequest $request, Category $category)
     {
-        //
+        $category->update([
+            'name' => $request->name,
+            'type' => $request->type,
+            'parent_id' => $request->parent_id ? $request->parent_id : null,
+            'icon' => $request->icon,
+            'color' => $request->color,
+        ]);
+
+        return redirect()->route('categories.index')->with('success', 'Category updated successfully.');
     }
 
     /**
