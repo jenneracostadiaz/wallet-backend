@@ -1,4 +1,7 @@
 import { Category } from '@/types/categories';
+import { Pencil } from 'lucide-react';
+import { Link } from '@inertiajs/react';
+import DeleteCategoryButton from '@/pages/categories/components/delete-category-button';
 
 interface CategoryItemProps {
     category: Category;
@@ -22,7 +25,16 @@ export default function CategoryItem({ category }: CategoryItemProps) {
             <span className={typeStyles[category.type] ?? 'hidden'}>
                 {typeIcons[category.type] ?? null}
             </span>
-            <span>{category.name}</span>
+            <span className="flex-1">{category.name} {category.icon}</span>
+            <span className="flex items-center justify-end gap-2">
+                <Link
+                    href={route('categories.edit', category.id)}
+                    className="bg-teal-400 dark:bg-teal-800 hover:bg-teal-200 p-1 rounded cursor-pointer inline-flex"
+                >
+                    <Pencil size={12} />
+                </Link>
+                <DeleteCategoryButton categoryId={category.id} />
+            </span>
         </li>
     );
 }
