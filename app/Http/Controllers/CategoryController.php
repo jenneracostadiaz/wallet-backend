@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CategoryRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -35,9 +36,17 @@ class CategoryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CategoryRequest $request)
     {
-        //
+        auth()->user()->categories()->create([
+            'name' => $request->name,
+            'type' => $request->type,
+            'parent_id' => $request->parent_id ? $request->parent_id : null,
+            'icon' => $request->icon,
+            'color' => $request->color,
+            'order' => auth()->user()->categories()->max('order') + 1,
+        ]);
+        return redirect()->route('categories.index')->with('success', 'Category created successfully.');
     }
 
     /**
