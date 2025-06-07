@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\TransactionRequest;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TransactionController extends Controller
 {
@@ -13,7 +15,10 @@ class TransactionController extends Controller
     public function index()
     {
         return inertia('transactions/index', [
-            'transactions' => auth()->user()->transactions()->with(['account', 'category'])->get(),
+            'transactions' => auth()->user()->transactions()
+                ->with(['account.currency', 'category', 'toAccount.currency'])
+                ->orderBy('date', 'desc')
+                ->get(),
         ]);
     }
 
@@ -23,7 +28,7 @@ class TransactionController extends Controller
     public function create()
     {
         return inertia('transactions/create', [
-            'accounts' => auth()->user()->accounts()->get(),
+            'accounts' => auth()->user()->accounts()->with('currency')->get(),
             'categories' => auth()->user()->categories()->get(),
             'types' => [
                 [
@@ -45,23 +50,36 @@ class TransactionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(TransactionRequest $request)
     {
-        $validated = $request->validate([
-            'amount' => 'required|numeric',
-            'description' => 'nullable|string|max:255',
-            'date' => 'required|date',
-            'type' => 'required|string|in:income,expense,transfer',
-            'account_id' => 'required|exists:accounts,id',
-            'category_id' => 'required_unless:type,transfer|exists:categories,id|nullable',
-            'to_account_id' => 'required_if:type,transfer|exists:accounts,id|nullable',
-        ]);
+        $validated = $request->validated();
+        $account = auth()->user()->accounts()->findOrFail($validated['account_id']);
 
-        $validated['user_id'] = auth()->id();
+        if ($validated['type'] === 'transfer' && $validated['to_account_id']) {
+            // Verificar que la cuenta destino también pertenece al usuario
+            $toAccount = auth()->user()->accounts()->findOrFail($validated['to_account_id']);
+        }
 
-        auth()->user()->transactions()->create($validated);
+        if ($validated['category_id']) {
+            // Verificar que la categoría pertenece al usuario y es del tipo correcto
+            $category = auth()->user()->categories()
+                ->where('id', $validated['category_id'])
+                ->where('type', $validated['type'])
+                ->firstOrFail();
+        }
 
-        return redirect()->route('transactions.index');
+        DB::transaction(function () use ($validated, $account) {
+            $validated['user_id'] = auth()->id();
+
+            // Crear la transacción
+            $transaction = auth()->user()->transactions()->create($validated);
+
+            // Actualizar saldos de cuentas
+            $this->updateAccountBalances($transaction);
+        });
+
+        return redirect()->route('transactions.index')
+            ->with('success', 'Transaction created successfully!');
     }
 
     /**
@@ -69,9 +87,14 @@ class TransactionController extends Controller
      */
     public function edit(Transaction $transaction)
     {
+        // Verificar que la transacción pertenece al usuario
+        if ($transaction->user_id !== auth()->id()) {
+            abort(403);
+        }
+
         return inertia('transactions/edit', [
-            'transaction' => $transaction->load(['account', 'category', 'toAccount']),
-            'accounts' => auth()->user()->accounts()->get(),
+            'transaction' => $transaction->load(['account.currency', 'category', 'toAccount.currency']),
+            'accounts' => auth()->user()->accounts()->with('currency')->get(),
             'categories' => auth()->user()->categories()->get(),
             'types' => [
                 [
@@ -93,33 +116,109 @@ class TransactionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(TransactionRequest $request, Transaction $transaction)
     {
-        $transaction = auth()->user()->transactions()->findOrFail($id);
 
-        $validated = $request->validate([
-            'amount' => 'required|numeric',
-            'description' => 'nullable|string|max:255',
-            'date' => 'required|date',
-            'type' => 'required|string|in:income,expense,transfer',
-            'account_id' => 'required|exists:accounts,id',
-            'category_id' => 'required_unless:type,transfer|exists:categories,id|nullable',
-            'to_account_id' => 'required_if:type,transfer|exists:accounts,id|nullable',
-        ]);
+        // Verificar que la cuenta pertenece al usuario
+        $account = auth()->user()->accounts()->findOrFail($validated['account_id']);
 
-        $transaction->update($validated);
+        if ($validated['type'] === 'transfer' && $validated['to_account_id']) {
+            // Verificar que la cuenta destino también pertenece al usuario
+            $toAccount = auth()->user()->accounts()->findOrFail($validated['to_account_id']);
+        }
 
-        return redirect()->route('transactions.index');
+        if ($validated['category_id']) {
+            // Verificar que la categoría pertenece al usuario y es del tipo correcto
+            $category = auth()->user()->categories()
+                ->where('id', $validated['category_id'])
+                ->where('type', $validated['type'])
+                ->firstOrFail();
+        }
+
+        DB::transaction(function () use ($validated, $transaction) {
+            // Revertir los cambios de saldo anteriores
+            $this->revertAccountBalances($transaction);
+
+            // Actualizar la transacción
+            $transaction->update($validated);
+
+            // Aplicar los nuevos cambios de saldo
+            $this->updateAccountBalances($transaction->fresh());
+        });
+
+        return redirect()->route('transactions.index')
+            ->with('success', 'Transaction updated successfully!');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Transaction $transaction)
     {
-        $transaction = auth()->user()->transactions()->findOrFail($id);
-        $transaction->delete();
 
-        return redirect()->route('transactions.index');
+        DB::transaction(function () use ($transaction) {
+            // Revertir los cambios de saldo
+            $this->revertAccountBalances($transaction);
+
+            // Eliminar la transacción
+            $transaction->delete();
+        });
+
+        return redirect()->route('transactions.index')
+            ->with('success', 'Transaction deleted successfully!');
+    }
+
+    /**
+     * Update account balances based on transaction
+     */
+    private function updateAccountBalances(Transaction $transaction)
+    {
+        $account = $transaction->account;
+
+        switch ($transaction->type) {
+            case 'income':
+                $account->increment('balance', $transaction->amount);
+                break;
+
+            case 'expense':
+                $account->decrement('balance', $transaction->amount);
+                break;
+
+            case 'transfer':
+                if ($transaction->toAccount) {
+                    // Restar del origen
+                    $account->decrement('balance', $transaction->amount);
+                    // Sumar al destino
+                    $transaction->toAccount->increment('balance', $transaction->amount);
+                }
+                break;
+        }
+    }
+
+    /**
+     * Revert account balances based on transaction
+     */
+    private function revertAccountBalances(Transaction $transaction)
+    {
+        $account = $transaction->account;
+
+        switch ($transaction->type) {
+            case 'income':
+                $account->decrement('balance', $transaction->amount);
+                break;
+
+            case 'expense':
+                $account->increment('balance', $transaction->amount);
+                break;
+
+            case 'transfer':
+                if ($transaction->toAccount) {
+                    // Revertir: sumar al origen
+                    $account->increment('balance', $transaction->amount);
+                    // Revertir: restar del destino
+                    $transaction->toAccount->decrement('balance', $transaction->amount);
+                }
+                break;
+        }
     }
 }
