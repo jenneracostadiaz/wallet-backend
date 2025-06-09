@@ -11,7 +11,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Dashboard() {
-    const { totalsByCurrency, accounts } = usePage().props as {
+    const { totalsByCurrency, accounts } = usePage().props as unknown as {
         totalsByCurrency: { currency: string; currency_symbol: string; total: number }[];
         accounts: { name: string; balance: number; currency: string; currency_symbol: string }[];
     };
