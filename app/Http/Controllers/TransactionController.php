@@ -35,6 +35,13 @@ class TransactionController extends Controller
         if ($request->filled('date_to')) {
             $query->whereDate('date', '<=', $request->input('date_to'));
         }
+        if ($request->filled('type')) {
+            $types = $request->input('type');
+            if (!is_array($types)) {
+                $types = [$types];
+            }
+            $query->whereIn('type', $types);
+        }
 
         return inertia('transactions/index', [
             'transactions' => $query->get(),
@@ -43,6 +50,7 @@ class TransactionController extends Controller
                 'category_id' => $request->input('category_id'),
                 'date_from' => $request->input('date_from'),
                 'date_to' => $request->input('date_to'),
+                'type' => $request->input('type'),
             ],
         ]);
     }

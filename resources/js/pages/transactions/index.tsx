@@ -21,19 +21,32 @@ interface IndexProps {
         category_id?: number | string,
         date_from?: string,
         date_to?: string,
+        type?: string[] | string,
     },
 }
+
+const TRANSACTION_TYPES = [
+    { value: 'income', label: 'Income' },
+    { value: 'expense', label: 'Expense' },
+    { value: 'transfer', label: 'Transfer' },
+];
 
 export default function Index({ transactions, categories, filters }: IndexProps) {
     const { data, setData, get } = useForm({
         category_id: filters.category_id || '',
         date_from: filters.date_from || '',
         date_to: filters.date_to || '',
+        type: Array.isArray(filters.type) ? filters.type : (filters.type ? [filters.type] : []),
     });
 
     const handleFilter = (e: React.FormEvent) => {
         e.preventDefault();
         get('/transactions', { preserveState: true });
+    };
+
+    const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selected = Array.from(e.target.selectedOptions).map(opt => opt.value);
+        setData('type', selected);
     };
 
     return (
@@ -56,6 +69,20 @@ export default function Index({ transactions, categories, filters }: IndexProps)
                                 <option key={cat.id} value={cat.id}>{cat.name}</option>
                             ))}
                         </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Tipo</label>
+                        <select
+                            multiple
+                            className="border rounded px-2 py-1 min-w-[120px]"
+                            value={data.type}
+                            onChange={handleTypeChange}
+                        >
+                            {TRANSACTION_TYPES.map(type => (
+                                <option key={type.value} value={type.value}>{type.label}</option>
+                            ))}
+                        </select>
+                        <div className="text-xs text-gray-500 mt-1">Ctrl+Click para selección múltiple</div>
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-1">Desde</label>
