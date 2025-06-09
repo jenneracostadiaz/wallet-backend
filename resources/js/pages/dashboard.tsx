@@ -2,6 +2,9 @@ import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
+import dayjs from 'dayjs';
+import 'dayjs/locale/es';
+dayjs.locale('es');
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -11,10 +14,20 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Dashboard() {
-    const { totalsByCurrency, accounts, monthlySummary } = usePage().props as unknown as {
+    const { totalsByCurrency, accounts, monthlySummary, latestTransactions } = usePage().props as unknown as {
         totalsByCurrency: { currency: string; currency_symbol: string; total: number }[];
         accounts: { name: string; balance: number; currency: string; currency_symbol: string }[];
         monthlySummary: Record<string, number>;
+        latestTransactions: {
+            id: number;
+            date: string;
+            amount: number;
+            type: string;
+            account: string;
+            currency_symbol: string;
+            category: string;
+            description: string;
+        }[];
     };
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -54,8 +67,51 @@ export default function Dashboard() {
                         </ul>
                     </div>
                 </div>
+                {/* Filtros para transacciones */}
+                <div className="mb-4 flex flex-wrap gap-4 items-end">
+                    {/* Aquí puedes agregar más filtros si lo deseas */}
+                    {/* Ejemplo: filtro por tipo */}
+                    {/* <select ...>...</select> */}
+                </div>
                 <div className="border-sidebar-border/70 dark:border-sidebar-border relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min">
-                    <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
+                    <div className="p-6">
+                        <div className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">Latest transactions</div>
+                        <table className="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
+                            <thead>
+                                <tr>
+                                    <th className="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                                    <th className="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase">Cuenta</th>
+                                    <th className="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
+                                    <th className="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
+                                    <th className="px-2 py-1 text-right text-xs font-medium text-gray-500 uppercase">Monto</th>
+                                    <th className="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase">Descripción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {latestTransactions.length === 0 && (
+                                    <tr><td colSpan={6} className="text-center py-4 text-gray-400">No hay transacciones recientes.</td></tr>
+                                )}
+                                {latestTransactions.map(tx => (
+                                    <tr key={tx.id} className="hover:bg-gray-50 dark:hover:bg-neutral-800">
+                                        <td className="px-2 py-1 whitespace-nowrap">{dayjs(tx.date).format('D MMM YYYY')}</td>
+                                        <td className="px-2 py-1 whitespace-nowrap">{tx.account}</td>
+                                        <td className="px-2 py-1 whitespace-nowrap">{tx.category}</td>
+                                        <td className="px-2 py-1 whitespace-nowrap capitalize">{tx.type}</td>
+                                        <td className="px-2 py-1 whitespace-nowrap text-right font-semibold">
+                                            <span className={
+                                                tx.type === 'income' ? 'text-green-600 dark:text-green-400' :
+                                                tx.type === 'expense' ? 'text-red-600 dark:text-red-400' :
+                                                'text-blue-600 dark:text-blue-400'
+                                            }>
+                                                {tx.currency_symbol}{tx.amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                                            </span>
+                                        </td>
+                                        <td className="px-2 py-1 whitespace-nowrap">{tx.description}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </AppLayout>
