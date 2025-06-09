@@ -11,9 +11,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Dashboard() {
-    const { totalsByCurrency, accounts } = usePage().props as unknown as {
+    const { totalsByCurrency, accounts, monthlySummary } = usePage().props as unknown as {
         totalsByCurrency: { currency: string; currency_symbol: string; total: number }[];
         accounts: { name: string; balance: number; currency: string; currency_symbol: string }[];
+        monthlySummary: Record<string, number>;
     };
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -43,8 +44,14 @@ export default function Dashboard() {
                             ))}
                         </ul>
                     </div>
-                    <div className="border-sidebar-border/70 dark:border-sidebar-border relative aspect-video overflow-hidden rounded-xl border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
+                    {/* Widget de resumen mensual */}
+                    <div className="border-sidebar-border/70 dark:border-sidebar-border relative aspect-video overflow-hidden rounded-xl border bg-white dark:bg-neutral-900 flex flex-col p-4 items-center justify-center">
+                        <div className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">Resumen mensual actual</div>
+                        <ul className="flex flex-col gap-1">
+                            <li className="text-green-600 dark:text-green-400 font-medium">Income: {monthlySummary.income ? monthlySummary.income.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0.00'}</li>
+                            <li className="text-red-600 dark:text-red-400 font-medium">Expense: {monthlySummary.expense ? monthlySummary.expense.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0.00'}</li>
+                            <li className="text-blue-600 dark:text-blue-400 font-medium">Transfer: {monthlySummary.transfer ? monthlySummary.transfer.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0.00'}</li>
+                        </ul>
                     </div>
                 </div>
                 <div className="border-sidebar-border/70 dark:border-sidebar-border relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min">
