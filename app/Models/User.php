@@ -50,6 +50,16 @@ class User extends Authenticatable
 
     public function accounts(): HasMany
     {
-        return $this->hasMany(Account::class);
+        return $this->hasMany(Account::class)->orderBy('order');
+    }
+
+    public function categories(): HasMany
+    {
+        return $this->hasMany(Category::class)->orderBy('order');
+    }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class)->orderBy('date', 'desc');
     }
 }
