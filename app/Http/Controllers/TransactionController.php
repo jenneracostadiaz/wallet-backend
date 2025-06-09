@@ -29,6 +29,9 @@ class TransactionController extends Controller
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->input('category_id'));
         }
+        if ($request->filled('account_id')) {
+            $query->where('account_id', $request->input('account_id'));
+        }
         if ($request->filled('date_from')) {
             $query->whereDate('date', '>=', $request->input('date_from'));
         }
@@ -46,8 +49,10 @@ class TransactionController extends Controller
         return inertia('transactions/index', [
             'transactions' => $query->get(),
             'categories' => auth()->user()->categories()->get(),
+            'accounts' => auth()->user()->accounts()->with('currency')->get(),
             'filters' => [
                 'category_id' => $request->input('category_id'),
+                'account_id' => $request->input('account_id'),
                 'date_from' => $request->input('date_from'),
                 'date_to' => $request->input('date_to'),
                 'type' => $request->input('type'),

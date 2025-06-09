@@ -6,6 +6,7 @@ import { Transaction } from '@/types/transactions';
 import CreateTransactionSection from '@/pages/transactions/components/create-transaction-section';
 import TransactionList from '@/pages/transactions/components/transaction-list';
 import type { Category } from '@/types/categories';
+import type { Account } from '@/types/accounts';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -17,8 +18,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 interface IndexProps {
     transactions: Transaction[],
     categories: Category[],
+    accounts: Account[],
     filters: {
         category_id?: number | string,
+        account_id?: number | string,
         date_from?: string,
         date_to?: string,
         type?: string[] | string,
@@ -31,9 +34,10 @@ const TRANSACTION_TYPES = [
     { value: 'transfer', label: 'Transfer' },
 ];
 
-export default function Index({ transactions, categories, filters }: IndexProps) {
+export default function Index({ transactions, categories, accounts, filters }: IndexProps) {
     const { data, setData, get } = useForm({
         category_id: filters.category_id || '',
+        account_id: filters.account_id || '',
         date_from: filters.date_from || '',
         date_to: filters.date_to || '',
         type: Array.isArray(filters.type) ? filters.type : (filters.type ? [filters.type] : []),
@@ -67,6 +71,19 @@ export default function Index({ transactions, categories, filters }: IndexProps)
                             <option value="">Todas</option>
                             {categories.map(cat => (
                                 <option key={cat.id} value={cat.id}>{cat.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Cuenta</label>
+                        <select
+                            className="border rounded px-2 py-1"
+                            value={data.account_id}
+                            onChange={e => setData('account_id', e.target.value)}
+                        >
+                            <option value="">Todas</option>
+                            {accounts.map(acc => (
+                                <option key={acc.id} value={acc.id}>{acc.name}</option>
                             ))}
                         </select>
                     </div>
