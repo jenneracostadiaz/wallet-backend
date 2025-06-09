@@ -19,13 +19,31 @@ class TransactionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $query = auth()->user()->transactions()
+            ->with(['account.currency', 'category', 'toAccount.currency'])
+            ->orderBy('date', 'desc');
+
+        // Filtros
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->input('category_id'));
+        }
+        if ($request->filled('date_from')) {
+            $query->whereDate('date', '>=', $request->input('date_from'));
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('date', '<=', $request->input('date_to'));
+        }
+
         return inertia('transactions/index', [
-            'transactions' => auth()->user()->transactions()
-                ->with(['account.currency', 'category', 'toAccount.currency'])
-                ->orderBy('date', 'desc')
-                ->get(),
+            'transactions' => $query->get(),
+            'categories' => auth()->user()->categories()->get(),
+            'filters' => [
+                'category_id' => $request->input('category_id'),
+                'date_from' => $request->input('date_from'),
+                'date_to' => $request->input('date_to'),
+            ],
         ]);
     }
 
