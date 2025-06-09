@@ -30,10 +30,17 @@ class DashboardController extends Controller
                 'currency_symbol' => $account->currency->symbol,
             ];
         });
+        // Resumen mensual básico
+        $currentMonth = now()->format('Y-m');
+        $monthlySummary = $user->transactions()
+            ->whereRaw("strftime('%Y-%m', date) = ?", [$currentMonth])
+            ->selectRaw('type, SUM(amount) as total')
+            ->groupBy('type')
+            ->pluck('total', 'type');
         return Inertia::render('dashboard', [
             'totalsByCurrency' => $totalsByCurrency,
             'accounts' => $accountsList,
+            'monthlySummary' => $monthlySummary,
         ]);
     }
 }
-
