@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreAccountRequest;
 use App\Http\Requests\UpdateAccountRequest;
+use App\Http\Resources\AccountResource;
 use App\Models\Account;
 
 class AccountController extends Controller
@@ -13,7 +14,7 @@ class AccountController extends Controller
         return $this->handleExceptions(function () {
             $accounts = $this->user()->accounts()->with('currency')->get();
 
-            return response()->json($accounts);
+            return AccountResource::collection($accounts);
         }, 'Error retrieving accounts');
     }
 
@@ -21,8 +22,9 @@ class AccountController extends Controller
     {
         return $this->handleExceptions(function () use ($account) {
             $this->authorizeAccount($account);
+            $account->load('currency');
 
-            return response()->json($account->load('currency'));
+            return new AccountResource($account);
         }, 'Error retrieving account');
     }
 
@@ -38,8 +40,9 @@ class AccountController extends Controller
                 'description' => $request->description,
                 'order' => $order,
             ]);
+            $account->load('currency');
 
-            return response()->json($account, 201);
+            return (new AccountResource($account))->response()->setStatusCode(201);
         }, 'Error creating account');
     }
 
@@ -48,8 +51,9 @@ class AccountController extends Controller
         return $this->handleExceptions(function () use ($request, $account) {
             $this->authorizeAccount($account);
             $account->update($request->all());
+            $account->load('currency');
 
-            return response()->json($account);
+            return new AccountResource($account);
         }, 'Error updating account');
     }
 
