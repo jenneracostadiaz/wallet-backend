@@ -23,5 +23,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource('currencies', CurrencyController::class)
         ->only(['index', 'show']);
 
-    Route::resource('accounts', AccountController::class);
+    Route::resource('accounts', AccountController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
 });
