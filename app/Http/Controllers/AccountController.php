@@ -6,6 +6,8 @@ use App\Http\Requests\StoreAccountRequest;
 use App\Http\Requests\UpdateAccountRequest;
 use App\Http\Resources\AccountResource;
 use App\Models\Account;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class AccountController extends Controller
 {
@@ -78,7 +80,7 @@ class AccountController extends Controller
     private function authorizeAccount(Account $account)
     {
         if ($account->user_id !== auth()->id()) {
-            abort(response()->json(['error' => 'Unauthorized'], 403));
+            abort(403, 'Unauthorized');
         }
     }
 
@@ -86,6 +88,8 @@ class AccountController extends Controller
     {
         try {
             return $callback();
+        } catch (ValidationException|HttpException $e) {
+            throw $e;
         } catch (\Exception $e) {
             return response()->json([
                 'error' => $errorMessage,

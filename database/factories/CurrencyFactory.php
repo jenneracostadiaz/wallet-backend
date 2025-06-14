@@ -19,9 +19,9 @@ class CurrencyFactory extends Factory
     {
 
         return [
-            'code' => $this->faker->currencyCode,
-            'name' => $this->faker->word,
-            'symbol' => $this->faker->randomElement(['$', '€', 'S/', '£', '¥']),
+            'code' => fake()->randomElement(['USD', 'EUR', 'GBP', 'JPY', 'CNY']),
+            'name' => fake()->word(),
+            'symbol' => fake()->randomElement(['$', '€', 'S/', '£', '¥']),
             'decimal_places' => 2,
             'is_active' => true,
         ];

@@ -28,7 +28,7 @@ class CurrencyController extends Controller
         try {
             return response()->json($currency);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error retrieving currency', 'message' => $e->getMessage()], 500);
+            return response()->json(['erro  r' => 'Error retrieving currency', 'message' => $e->getMessage()], 500);
         }
     }
 }
