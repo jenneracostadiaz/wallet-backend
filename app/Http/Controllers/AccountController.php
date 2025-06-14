@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreAccountRequest;
+use App\Http\Requests\UpdateAccountRequest;
 use App\Models\Account;
-use Illuminate\Http\Request;
 
 class AccountController extends Controller
 {
@@ -11,6 +12,7 @@ class AccountController extends Controller
     {
         return $this->handleExceptions(function () {
             $accounts = $this->user()->accounts()->with('currency')->get();
+
             return response()->json($accounts);
         }, 'Error retrieving accounts');
     }
@@ -19,23 +21,15 @@ class AccountController extends Controller
     {
         return $this->handleExceptions(function () use ($account) {
             $this->authorizeAccount($account);
+
             return response()->json($account->load('currency'));
         }, 'Error retrieving account');
     }
 
-    public function store(Request $request)
+    public function store(StoreAccountRequest $request)
     {
         return $this->handleExceptions(function () use ($request) {
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'type' => 'required|string|in:checking,savings,credit_card,cash',
-                'balance' => 'required|numeric|min:0',
-                'currency_id' => 'required|exists:currencies,id',
-                'description' => 'nullable|string|max:1000',
-            ]);
-
             $order = $this->user()->accounts()->max('order') + 1;
-
             $account = $this->user()->accounts()->create([
                 'name' => $request->name,
                 'type' => $request->type,
@@ -49,18 +43,12 @@ class AccountController extends Controller
         }, 'Error creating account');
     }
 
-    public function update(Request $request, Account $account)
+    public function update(UpdateAccountRequest $request, Account $account)
     {
         return $this->handleExceptions(function () use ($request, $account) {
             $this->authorizeAccount($account);
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'type' => 'required|string|in:checking,savings,credit_card,cash',
-                'balance' => 'required|numeric|min:0',
-                'currency_id' => 'required|exists:currencies,id',
-                'description' => 'nullable|string|max:1000',
-            ]);
             $account->update($request->all());
+
             return response()->json($account);
         }, 'Error updating account');
     }
@@ -70,12 +58,13 @@ class AccountController extends Controller
         return $this->handleExceptions(function () use ($account) {
             $this->authorizeAccount($account);
             $account->delete();
+
             return response()->json(['message' => 'Account deleted successfully']);
         }, 'Error deleting account');
     }
 
     /**
-     * Métodos privados auxiliares
+     * Auxiliary private methods
      */
     private function user()
     {
