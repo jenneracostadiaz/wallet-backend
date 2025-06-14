@@ -58,4 +58,42 @@ class AccountController extends Controller
             return response()->json(['error' => 'Error creating account', 'message' => $e->getMessage()], 500);
         }
     }
+
+    public function update(Request $request, Account $account)
+    {
+        try {
+            if ($account->user_id !== auth()->id()) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'type' => 'required|string|in:checking,savings,credit_card,cash',
+                'balance' => 'required|numeric|min:0',
+                'currency_id' => 'required|exists:currencies,id',
+                'description' => 'nullable|string|max:1000',
+            ]);
+
+            $account->update($request->all());
+
+            return response()->json($account);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error updating account', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function destroy(Account $account)
+    {
+        try {
+            if ($account->user_id !== auth()->id()) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+
+            $account->delete();
+
+            return response()->json(['message' => 'Account deleted successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error deleting account', 'message' => $e->getMessage()], 500);
+        }
+    }
 }
