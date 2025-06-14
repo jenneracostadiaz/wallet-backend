@@ -31,5 +31,4 @@ class CurrencyController extends Controller
             return response()->json(['error' => 'Error retrieving currency', 'message' => $e->getMessage()], 500);
         }
     }
-
 }

@@ -22,4 +22,3 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource('currencies', CurrencyController::class)
         ->only(['index', 'show']);
 });
-
