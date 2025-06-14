@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\auth\AuthLoginRequest;
-use App\Http\Requests\auth\AuthRegisterRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -14,9 +12,14 @@ class AuthController extends Controller
     /**
      * Register a new user
      */
-    public function register(AuthRegisterRequest $request)
+    public function register(Request $request)
     {
         try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:8|confirmed',
+            ]);
 
             $user = User::query()->create([
                 'name' => $request->name,
@@ -40,12 +43,12 @@ class AuthController extends Controller
         }
     }
 
-    public function login(AuthLoginRequest $request)
+    public function login(Request $request)
     {
         try {
             $user = User::query()->where('email', $request->email)->first();
 
-            if (! $user || ! Hash::check($request->password, $user->password)) {
+            if (!$user || !Hash::check($request->password, $user->password)) {
                 throw ValidationException::withMessages([
                     'email' => ['The provided credentials are incorrect.'],
                 ]);
