@@ -13,7 +13,6 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create a default test user if it doesn't exist
         if (!User::query()->where('email', 'test@example.com')->exists()) {
             User::factory()->create([
                 'name' => 'Test User',
@@ -22,7 +21,6 @@ class UserSeeder extends Seeder
             ]);
         }
 
-        // Create 5 additional random users
         User::factory(5)->create();
     }
 }

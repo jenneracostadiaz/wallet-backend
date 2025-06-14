@@ -12,13 +12,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Call seeders in the correct order
         $this->call([
-            UserSeeder::class,      // First, create users
-            CurrencySeeder::class,  // Then create currencies
-            CategorySeeder::class,  // Then create categories
-            AccountSeeder::class,   // Then create accounts
-            TransactionSeeder::class, // Finally, create transactions
+            UserSeeder::class,
+            CurrencySeeder::class,
         ]);
     }
 }

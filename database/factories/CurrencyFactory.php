@@ -6,17 +6,10 @@ use App\Models\Currency;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Currency>
+ * @extends Factory<Currency>
  */
 class CurrencyFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
-    protected $model = Currency::class;
-
     /**
      * Define the model's default state.
      *
@@ -24,10 +17,11 @@ class CurrencyFactory extends Factory
      */
     public function definition(): array
     {
+
         return [
             'code' => $this->faker->currencyCode,
             'name' => $this->faker->word,
-            'symbol' => $this->faker->randomElement(['$', '€', '£', '¥']),
+            'symbol' => $this->faker->randomElement(['$', '€', 'S/', '£', '¥']),
             'decimal_places' => 2,
             'is_active' => true,
             'order' => $this->faker->numberBetween(1, 10),
