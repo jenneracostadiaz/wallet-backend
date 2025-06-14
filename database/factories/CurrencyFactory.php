@@ -24,7 +24,6 @@ class CurrencyFactory extends Factory
             'symbol' => $this->faker->randomElement(['$', '€', 'S/', '£', '¥']),
             'decimal_places' => 2,
             'is_active' => true,
-            'order' => $this->faker->numberBetween(1, 10),
         ];
     }
 }

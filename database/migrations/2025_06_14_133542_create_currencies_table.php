@@ -18,8 +18,6 @@ return new class extends Migration
             $table->string('symbol', 10);
             $table->unsignedTinyInteger('decimal_places')->default(2);
             $table->boolean('is_active')->default(true);
-            $table->unsignedInteger('order')->default(0);
-            $table->timestamps();
         });
     }
 

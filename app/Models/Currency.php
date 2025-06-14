@@ -17,8 +17,9 @@ class Currency extends Model
         'symbol',
         'decimal_places',
         'is_active',
-        'order',
     ];
+
+    public $timestamps = false;
 
     protected $casts = [
         'decimal_places' => 'integer',
