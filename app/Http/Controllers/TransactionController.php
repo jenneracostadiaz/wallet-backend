@@ -66,12 +66,15 @@ class TransactionController extends Controller
             ->setStatusCode(201);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdateTransactionRequest $request, Transaction $transaction)
     {
-        //
+        $this->authorize('update', $transaction);
+
+        $transaction->update($request->validated());
+
+        return (new TransactionResource($transaction->load(['account.currency', 'category'])))
+            ->response()
+            ->setStatusCode(200);
     }
 
     /**
