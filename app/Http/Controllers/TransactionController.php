@@ -6,17 +6,46 @@ use App\Http\Requests\StoreTransactionRequest;
 use App\Http\Requests\UpdateTransactionRequest;
 use App\Http\Resources\TransactionResource;
 use App\Models\Transaction;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class TransactionController extends Controller
 {
-    public function index(): AnonymousResourceCollection
+    public function index(Request $request): AnonymousResourceCollection
     {
         $transactions = auth()->user()
-            ->transactions()
-            ->get();
+            ->transactions();
 
-        return TransactionResource::collection($transactions);
+        // Filters
+        if ($request->filled('category_id')) {
+            $transactions->where('category_id', $request
+                ->input('category_id'));
+        }
+
+        if ($request->filled('account_id')) {
+            $transactions->where('account_id', $request
+                ->input('account_id'));
+        }
+
+        if ($request->filled('date_from')) {
+            $transactions->whereDate('date', '>=', $request
+                ->input('date_from'));
+        }
+
+        if ($request->filled('date_to')) {
+            $transactions->whereDate('date', '<=', $request
+                ->input('date_to'));
+        }
+
+        if ($request->filled('type')) {
+            $types = $request->input('type');
+            if (!is_array($types)) {
+                $types = [$types];
+            }
+            $transactions->whereIn('type', $types);
+        }
+
+        return TransactionResource::collection($transactions->paginate());
     }
 
     /**
