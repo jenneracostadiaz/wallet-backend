@@ -6,6 +6,7 @@ use App\Http\Requests\StoreTransactionRequest;
 use App\Http\Requests\UpdateTransactionRequest;
 use App\Http\Resources\TransactionResource;
 use App\Models\Transaction;
+use App\Services\TransactionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -14,6 +15,8 @@ use Throwable;
 
 class TransactionController extends Controller
 {
+    public function __construct(private readonly TransactionService $transactionService) {}
+
     public function index(Request $request): AnonymousResourceCollection
     {
         $transactions = auth()->user()
@@ -63,16 +66,10 @@ class TransactionController extends Controller
      */
     public function store(StoreTransactionRequest $request): JsonResponse
     {
-        $transaction = null;
-
-        DB::transaction(function () use ($request, &$transaction) {
-
-            $transaction = auth()->user()->transactions()->create([
-                ...$request->validated(),
-            ]);
-
-            $this->updateAccountBalances($transaction);
-        });
+        $transaction = $this->transactionService->create(
+            auth()->user(),
+            $request->validated()
+        );
 
         return (new TransactionResource($transaction))
             ->response()
@@ -86,13 +83,12 @@ class TransactionController extends Controller
     {
         $this->authorize('update', $transaction);
 
-        DB::transaction(function () use ($request, $transaction) {
-            $this->revertAccountBalances($transaction);
-            $transaction->update($request->validated());
-            $this->updateAccountBalances($transaction);
-        });
+        $updatedTransaction = $this->transactionService->update(
+            $transaction,
+            $request->validated()
+        );
 
-        return (new TransactionResource($transaction->load(['account.currency', 'category'])))
+        return (new TransactionResource($updatedTransaction->load(['account.currency', 'category'])))
             ->response()
             ->setStatusCode(200);
     }
@@ -104,58 +100,11 @@ class TransactionController extends Controller
     {
         $this->authorize('delete', $transaction);
 
-        DB::transaction(function () use ($transaction) {
-            $this->revertAccountBalances($transaction);
-            $transaction->delete();
-        });
+        $balance = $this->transactionService->delete($transaction);
 
         return response()->json([
             'message' => 'Transaction deleted successfully',
-            'balance' => $transaction->account->balance,
+            'balance' => $balance,
         ]);
-    }
-
-    private function updateAccountBalances(Transaction $transaction): void
-    {
-        $account = $transaction->account;
-
-        switch ($transaction->type) {
-            case 'income':
-                $account->increment('balance', $transaction->amount);
-                break;
-
-            case 'expense':
-                $account->decrement('balance', $transaction->amount);
-                break;
-
-            case 'transfer':
-                if ($transaction->toAccount) {
-                    $account->decrement('balance', $transaction->amount);
-                    $transaction->toAccount->increment('balance', $transaction->amount);
-                }
-                break;
-        }
-    }
-
-    private function revertAccountBalances(Transaction $transaction)
-    {
-        $account = $transaction->account;
-
-        switch ($transaction->type) {
-            case 'income':
-                $account->decrement('balance', $transaction->amount);
-                break;
-
-            case 'expense':
-                $account->increment('balance', $transaction->amount);
-                break;
-
-            case 'transfer':
-                if ($transaction->toAccount) {
-                    $account->increment('balance', $transaction->amount);
-                    $transaction->toAccount->decrement('balance', $transaction->amount);
-                }
-                break;
-        }
     }
 }

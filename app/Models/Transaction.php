@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Builders\TransactionQueryBuilder;
 use Database\Factories\TransactionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -39,6 +40,11 @@ class Transaction extends Model
         'amount' => 'decimal:2',
         'date' => 'datetime',
     ];
+
+    public function newEloquentBuilder($query): TransactionQueryBuilder
+    {
+        return new TransactionQueryBuilder($query);
+    }
 
     public function account(): BelongsTo
     {
