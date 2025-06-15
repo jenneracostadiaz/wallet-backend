@@ -12,7 +12,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property $symbol
  * @property $decimal_places
  */
-
 class CurrencyResource extends JsonResource
 {
     /**
