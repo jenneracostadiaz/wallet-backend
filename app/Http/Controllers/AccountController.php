@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreAccountRequest;
+use App\Http\Requests\UpdateAccountRequest;
 use App\Http\Resources\AccountResource;
 use App\Models\Account;
 use Illuminate\Http\Request;
@@ -32,17 +34,9 @@ class AccountController extends Controller
         }
     }
 
-    public function store(Request $request)
+    public function store(StoreAccountRequest $request)
     {
         try {
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'type' => 'required|string|in:checking,savings,credit_card,cash',
-                'balance' => 'required|numeric|min:0',
-                'currency_id' => 'required|exists:currencies,id',
-                'description' => 'nullable|string|max:1000',
-            ]);
-
             $order = auth()->user()->accounts()->max('order') + 1;
 
             $account = auth()->user()->accounts()->create([
@@ -60,20 +54,12 @@ class AccountController extends Controller
         }
     }
 
-    public function update(Request $request, Account $account)
+    public function update(UpdateAccountRequest $request, Account $account)
     {
         try {
             if ($account->user_id !== auth()->id()) {
                 return response()->json(['error' => 'Unauthorized'], 403);
             }
-
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'type' => 'required|string|in:checking,savings,credit_card,cash',
-                'balance' => 'required|numeric|min:0',
-                'currency_id' => 'required|exists:currencies,id',
-                'description' => 'nullable|string|max:1000',
-            ]);
 
             $account->update($request->all());
             $account->load('currency');
