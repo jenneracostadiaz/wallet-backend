@@ -10,7 +10,6 @@ use App\Services\TransactionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class TransactionController extends Controller
@@ -19,37 +18,12 @@ class TransactionController extends Controller
 
     public function index(Request $request): AnonymousResourceCollection
     {
-        $transactions = auth()->user()
-            ->transactions();
-
-        // Filters
-        if ($request->filled('category_id')) {
-            $transactions->where('category_id', $request
-                ->input('category_id'));
-        }
-
-        if ($request->filled('account_id')) {
-            $transactions->where('account_id', $request
-                ->input('account_id'));
-        }
-
-        if ($request->filled('date_from')) {
-            $transactions->whereDate('date', '>=', $request
-                ->input('date_from'));
-        }
-
-        if ($request->filled('date_to')) {
-            $transactions->whereDate('date', '<=', $request
-                ->input('date_to'));
-        }
-
-        if ($request->filled('type')) {
-            $types = $request->input('type');
-            if (! is_array($types)) {
-                $types = [$types];
-            }
-            $transactions->whereIn('type', $types);
-        }
+        $transactions = Transaction::forUser(auth()->id())
+            ->when($request->filled('category_id'), fn ($q) => $q->inCategory($request->input('category_id')))
+            ->when($request->filled('account_id'), fn ($q) => $q->fromAccount($request->input('account_id')))
+            ->when($request->filled('date_from') || $request->filled('date_to'), fn ($q) => $q->betweenDates($request->input('date_from'), $request->input('date_to')))
+            ->when($request->filled('type'), fn ($q) => $q->ofType($request->input('type')))
+            ->withRelations();
 
         return TransactionResource::collection($transactions->paginate());
     }

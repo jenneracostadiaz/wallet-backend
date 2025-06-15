@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property $user_id
  * @property $toAccount
  * @property $account
+ * @method static forUser(int|string|null $id)
  */
 class Transaction extends Model
 {
