@@ -26,7 +26,7 @@ class TransactionPolicy
      */
     public function delete(User $user, Transaction $transaction): bool
     {
-        return $user->id === $transaction->user_id && $transaction->category_id === null;
+        return $user->id === $transaction->user_id;
     }
 
     /**
