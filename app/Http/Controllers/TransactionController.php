@@ -98,11 +98,21 @@ class TransactionController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @throws Throwable
      */
-    public function destroy(Transaction $transaction)
+    public function destroy(Transaction $transaction): JsonResponse
     {
-        //
+        $this->authorize('delete', $transaction);
+
+        DB::transaction(function () use ($transaction) {
+            $this->revertAccountBalances($transaction);
+            $transaction->delete();
+        });
+
+        return response()->json([
+            'message' => 'Transaction deleted successfully',
+            'balance' => $transaction->account->balance,
+        ]);
     }
 
     private function updateAccountBalances(Transaction $transaction): void
