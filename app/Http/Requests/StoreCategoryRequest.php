@@ -25,17 +25,17 @@ class StoreCategoryRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'El nombre de la categoría es obligatorio.',
-            'name.string' => 'El nombre de la categoría debe ser una cadena de texto.',
-            'name.max' => 'El nombre de la categoría no debe exceder 255 caracteres.',
-            'type.required' => 'El tipo de categoría es obligatorio.',
-            'type.string' => 'El tipo de categoría debe ser una cadena de texto.',
-            'type.in' => 'El tipo de categoría debe ser uno de: expense, income, transfer.',
-            'icon.string' => 'El icono debe ser una cadena de texto.',
-            'icon.max' => 'El icono no debe exceder 255 caracteres.',
-            'parent_id.exists' => 'La categoría padre seleccionada no existe.',
-            'user_id.required' => 'El ID de usuario es obligatorio.',
-            'user_id.exists' => 'El usuario seleccionado no existe.',
+            'name.required' => 'The category name is required.',
+            'name.string' => 'The category name must be a string.',
+            'name.max' => 'The category name must not exceed 255 characters.',
+            'type.required' => 'The category type is required.',
+            'type.string' => 'The category type must be a string.',
+            'type.in' => 'The category type must be one of: expense, income, transfer.',
+            'icon.string' => 'The icon must be a string.',
+            'icon.max' => 'The icon must not exceed 255 characters.',
+            'parent_id.exists' => 'The selected parent category does not exist.',
+            'user_id.required' => 'The user ID is required.',
+            'user_id.exists' => 'The selected user does not exist.',
         ];
     }
 

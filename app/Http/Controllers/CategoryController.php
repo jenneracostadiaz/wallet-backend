@@ -42,7 +42,11 @@ class CategoryController extends Controller
 
     public function update(UpdateCategoryRequest $request, Category $category)
     {
-        //
+        $this->authorize('update', $category);
+
+        $category->update($request->validated());
+
+        return new CategoryResource($category->load('subcategories'));
     }
 
     public function destroy(Category $category)
