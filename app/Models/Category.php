@@ -27,33 +27,21 @@ class Category extends Model
         'order' => 'integer',
     ];
 
-    /**
-     * Get the parent category.
-     */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'parent_id');
     }
 
-    /**
-     * Get the subcategories for the category.
-     */
     public function subcategories(): HasMany
     {
         return $this->hasMany(Category::class, 'parent_id');
     }
 
-    /**
-     * Get the user that owns the category.
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Get the transactions associated with the category.
-     */
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
