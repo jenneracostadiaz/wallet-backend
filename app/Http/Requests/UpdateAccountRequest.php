@@ -2,16 +2,18 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class UpdateAccountRequest extends FormRequest
 {
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
 
-    public function rules()
+    public function rules(): array
     {
         return [
             'name' => 'required|string|max:255',
@@ -22,7 +24,7 @@ class UpdateAccountRequest extends FormRequest
         ];
     }
 
-    public function messages()
+    public function messages(): array
     {
         return [
             'name.required' => 'The name field is required.',
@@ -39,5 +41,15 @@ class UpdateAccountRequest extends FormRequest
             'description.string' => 'The description must be a string.',
             'description.max' => 'The description may not be greater than 1000 characters.',
         ];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(
+            response()->json([
+                'error' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422)
+        );
     }
 }
