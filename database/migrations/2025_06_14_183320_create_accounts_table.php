@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('currency_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->text('description')->nullable();
-            $table->string('color')->default('#000000');
+            $table->string('color', 7)->nullable();
             $table->unsignedInteger('order')->default(0);
             $table->timestamps();
         });
