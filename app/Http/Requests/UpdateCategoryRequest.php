@@ -26,18 +26,18 @@ class UpdateCategoryRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'El nombre de la categoría es obligatorio.',
-            'name.string' => 'El nombre de la categoría debe ser una cadena de texto.',
-            'name.max' => 'El nombre de la categoría no puede tener más de 255 caracteres.',
-            'type.required' => 'El tipo de categoría es obligatorio.',
-            'type.in' => 'El tipo de categoría seleccionado no es válido.',
-            'type.string' => 'El tipo de categoría debe ser una cadena de texto.',
-            'icon.string' => 'El icono debe ser una cadena de texto.',
-            'icon.max' => 'El icono no puede tener más de 255 caracteres.',
-            'icon.required' => 'El icono es obligatorio.',
-            'parent_id.exists' => 'La categoría padre seleccionada no existe.',
-            'parent_id.integer' => 'El ID de la categoría padre debe ser un número entero.',
-            'parent_id.required' => 'La categoría padre es obligatoria.',
+            'name.required' => 'The category name is required.',
+            'name.string' => 'The category name must be a string.',
+            'name.max' => 'The category name may not be greater than 255 characters.',
+            'type.required' => 'The category type is required.',
+            'type.in' => 'The selected category type is invalid.',
+            'type.string' => 'The category type must be a string.',
+            'icon.string' => 'The icon must be a string.',
+            'icon.max' => 'The icon may not be greater than 255 characters.',
+            'icon.required' => 'The icon is required.',
+            'parent_id.exists' => 'The selected parent category does not exist.',
+            'parent_id.integer' => 'The parent category ID must be an integer.',
+            'parent_id.required' => 'The parent category is required.',
         ];
     }
 
