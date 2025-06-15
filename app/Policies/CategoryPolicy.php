@@ -19,7 +19,6 @@ class CategoryPolicy
 
     public function delete(User $user, Category $category): bool
     {
-        //        return $user->id === $category->user_id && $category->transactions()->count() === 0;
-        return $user->id === $category->user_id;
+        return $user->id === $category->user_id && $category->transactions()->count() === 0;
     }
 }

@@ -48,6 +48,25 @@ class TransactionController extends Controller
         return TransactionResource::collection($transactions->paginate());
     }
 
+    public function show(Transaction $transaction)
+    {
+        $this->authorize('view', $transaction);
+
+        return new TransactionResource($transaction->load(['account.currency', 'category']));
+    }
+
+    public function store(StoreTransactionRequest $request)
+    {
+        $transaction = auth()->user()->transactions()->create([
+            ...$request->validated(),
+            'order' => $this->getNextOrder(),
+        ]);
+
+        return (new TransactionResource($transaction))
+            ->response()
+            ->setStatusCode(201);
+    }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -56,21 +75,6 @@ class TransactionController extends Controller
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreTransactionRequest $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Transaction $transaction)
-    {
-        //
-    }
 
     /**
      * Show the form for editing the specified resource.
@@ -94,5 +98,12 @@ class TransactionController extends Controller
     public function destroy(Transaction $transaction)
     {
         //
+    }
+
+    private function getNextOrder(): int
+    {
+        return auth()->user()
+            ->transactions()
+            ->max('order') + 1;
     }
 }
