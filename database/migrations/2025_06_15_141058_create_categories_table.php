@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->enum('type', ['income', 'expense', 'transfer'])->default('income');
             $table->string('icon')->nullable();
-            $table->foreignId('parent_id')->constrained('categories')->onDelete('set null');
+            $table->foreignId('parent_id')->nullable()->constrained('categories')->onDelete('set null');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->unsignedInteger('order')->default(0);
             $table->timestamps();
