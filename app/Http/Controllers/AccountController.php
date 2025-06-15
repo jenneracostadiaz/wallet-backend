@@ -6,82 +6,63 @@ use App\Http\Requests\StoreAccountRequest;
 use App\Http\Requests\UpdateAccountRequest;
 use App\Http\Resources\AccountResource;
 use App\Models\Account;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class AccountController extends Controller
 {
-    public function index()
+    public function index(): AnonymousResourceCollection
     {
-        try {
-            $accounts = auth()->user()->accounts()->with('currency')->get();
+        $accounts = auth()->user()
+            ->accounts()
+            ->with('currency')
+            ->orderBy('order')
+            ->get();
 
-            return AccountResource::collection($accounts);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Error retrieving accounts', 'message' => $e->getMessage()], 500);
-        }
+        return AccountResource::collection($accounts);
     }
 
-    public function show(Account $account)
+    public function show(Account $account): AccountResource
     {
-        try {
-            if ($account->user_id !== auth()->id()) {
-                return response()->json(['error' => 'Unauthorized'], 403);
-            }
+        $this->authorize('view', $account);
 
-            return response()->json($account->load('currency'));
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Error retrieving account', 'message' => $e->getMessage()], 500);
-        }
+        return new AccountResource($account->load('currency'));
     }
 
-    public function store(StoreAccountRequest $request)
+    public function store(StoreAccountRequest $request): JsonResponse
     {
-        try {
-            $order = auth()->user()->accounts()->max('order') + 1;
+        $account = auth()->user()->accounts()->create([
+            ...$request->validated(),
+            'order' => $this->getNextOrder(),
+        ]);
 
-            $account = auth()->user()->accounts()->create([
-                'name' => $request->name,
-                'type' => $request->type,
-                'balance' => $request->balance,
-                'currency_id' => $request->currency_id,
-                'description' => $request->description,
-                'order' => $order,
-            ]);
-
-            return (new AccountResource($account))->response()->setStatusCode(201);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Error creating account', 'message' => $e->getMessage()], 500);
-        }
+        return (new AccountResource($account->load('currency')))
+            ->response()
+            ->setStatusCode(201);
     }
 
-    public function update(UpdateAccountRequest $request, Account $account)
+    public function update(UpdateAccountRequest $request, Account $account): AccountResource
     {
-        try {
-            if ($account->user_id !== auth()->id()) {
-                return response()->json(['error' => 'Unauthorized'], 403);
-            }
+        $this->authorize('update', $account);
 
-            $account->update($request->all());
-            $account->load('currency');
+        $account->update($request->validated());
 
-            return new AccountResource($account);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Error updating account', 'message' => $e->getMessage()], 500);
-        }
+        return new AccountResource($account->load('currency'));
     }
 
-    public function destroy(Account $account)
+    public function destroy(Account $account): JsonResponse
     {
-        try {
-            if ($account->user_id !== auth()->id()) {
-                return response()->json(['error' => 'Unauthorized'], 403);
-            }
+        $this->authorize('delete', $account);
 
-            $account->delete();
+        $account->delete();
 
-            return response()->json(['message' => 'Account deleted successfully']);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Error deleting account', 'message' => $e->getMessage()], 500);
-        }
+        return response()->json([
+            'message' => 'Account deleted successfully',
+        ]);
+    }
+
+    private function getNextOrder(): int
+    {
+        return auth()->user()->accounts()->max('order') + 1;
     }
 }
