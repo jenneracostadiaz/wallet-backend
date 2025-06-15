@@ -42,6 +42,7 @@ class AuthController extends Controller
             ]);
         }
 
+        $user->tokens()->delete();
         $token = $user->createToken('auth_token', ['*'], now()->addDays(30))->plainTextToken;
 
         return response()->json([
