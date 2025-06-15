@@ -18,7 +18,7 @@ class AccountController extends Controller
             ->with('currency')
             ->get();
 
-        return AccountResource::collection($accounts);
+        return AccountResource::collection($accounts->load('currency'));
     }
 
     public function show(Account $account): AccountResource
