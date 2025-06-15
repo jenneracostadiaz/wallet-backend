@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CurrencyController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,5 +25,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource('currencies', CurrencyController::class)
         ->only(['index', 'show']);
 
-    Route::resource('accounts', AccountController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
+    Route::resource('accounts', AccountController::class)->except(['create', 'edit']);
+    Route::resource('categories', CategoryController::class)->except(['create', 'edit']);
 });
