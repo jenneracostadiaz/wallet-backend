@@ -16,7 +16,6 @@ class AccountController extends Controller
         $accounts = auth()->user()
             ->accounts()
             ->with('currency')
-            ->orderBy('order')
             ->get();
 
         return AccountResource::collection($accounts);

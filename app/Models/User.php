@@ -56,6 +56,8 @@ class User extends Authenticatable
 
     public function categories(): HasMany
     {
-        return $this->hasMany(Category::class)->orderBy('order');
+        return $this->hasMany(Category::class)
+            ->whereNull('parent_id')
+            ->orderBy('order');
     }
 }

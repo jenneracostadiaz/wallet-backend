@@ -16,7 +16,7 @@ class CategorySeeder extends Seeder
         $users = User::all();
 
         foreach ($users as $user) {
-            $user->categories()->save(Category::factory()->make());
+            $user->categories()->saveMany(Category::factory()->count(10)->make());
         }
     }
 }
