@@ -39,7 +39,7 @@ class TransactionController extends Controller
 
         if ($request->filled('type')) {
             $types = $request->input('type');
-            if (!is_array($types)) {
+            if (! is_array($types)) {
                 $types = [$types];
             }
             $transactions->whereIn('type', $types);
@@ -59,29 +59,11 @@ class TransactionController extends Controller
     {
         $transaction = auth()->user()->transactions()->create([
             ...$request->validated(),
-            'order' => $this->getNextOrder(),
         ]);
 
         return (new TransactionResource($transaction))
             ->response()
             ->setStatusCode(201);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Transaction $transaction)
-    {
-        //
     }
 
     /**
@@ -98,12 +80,5 @@ class TransactionController extends Controller
     public function destroy(Transaction $transaction)
     {
         //
-    }
-
-    private function getNextOrder(): int
-    {
-        return auth()->user()
-            ->transactions()
-            ->max('order') + 1;
     }
 }

@@ -9,10 +9,11 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property $id
  * @property $type
  * @property $amount
- * @property $currency
- * @property $category
  * @property $date
  * @property $description
+ * @property $account
+ * @property $category
+ * @property $currency
  */
 class TransactionResource extends JsonResource
 {
@@ -27,7 +28,7 @@ class TransactionResource extends JsonResource
             'id' => $this->id,
             'type' => $this->type,
             'amount' => $this->amount,
-            'date' => $this->date->toDateString(),
+            'date' => $this->date->toDateTimeString(),
             'description' => $this->description,
             'category' => [
                 'id' => $this->category->id,
