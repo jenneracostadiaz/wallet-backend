@@ -23,7 +23,6 @@ class CurrencyFactory extends Factory
             'name' => fake()->word(),
             'symbol' => fake()->randomElement(['$', '€', 'S/', '£', '¥']),
             'decimal_places' => 2,
-            'is_active' => true,
         ];
     }
 }

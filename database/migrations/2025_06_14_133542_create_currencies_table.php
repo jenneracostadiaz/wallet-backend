@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('name');
             $table->string('symbol', 10);
             $table->unsignedTinyInteger('decimal_places')->default(2);
-            $table->boolean('is_active')->default(true);
         });
     }
 

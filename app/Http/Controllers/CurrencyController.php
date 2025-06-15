@@ -2,33 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\CurrencyResource;
 use App\Models\Currency;
 
 class CurrencyController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        try {
-            $currencies = Currency::all();
-
-            return response()->json($currencies);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Error retrieving currencies', 'message' => $e->getMessage()], 500);
-        }
+        $currencies = Currency::all();
+        return CurrencyResource::collection($currencies);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Currency $currency)
     {
-        try {
-            return response()->json($currency);
-        } catch (\Exception $e) {
-            return response()->json(['erro  r' => 'Error retrieving currency', 'message' => $e->getMessage()], 500);
-        }
+        return new CurrencyResource($currency);
     }
 }
