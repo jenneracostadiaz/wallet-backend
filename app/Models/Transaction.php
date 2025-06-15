@@ -7,6 +7,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property $amount
+ * @property $description
+ * @property $date
+ * @property $type
+ * @property $account_id
+ * @property $category_id
+ * @property $to_account_id
+ * @property $user_id
+ * @property $toAccount
+ * @property $account
+ */
 class Transaction extends Model
 {
     /** @use HasFactory<TransactionFactory> */
