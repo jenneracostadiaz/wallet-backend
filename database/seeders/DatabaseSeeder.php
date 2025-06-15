@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             CurrencySeeder::class,
             AccountSeeder::class,
             CategorySeeder::class,
+            TransactionSeeder::class,
         ]);
     }
 }
