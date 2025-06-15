@@ -60,4 +60,9 @@ class User extends Authenticatable
             ->whereNull('parent_id')
             ->orderBy('order');
     }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class)->orderBy('date', 'desc');
+    }
 }
