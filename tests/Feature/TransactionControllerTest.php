@@ -24,47 +24,131 @@ describe('TransactionsController', function () {
             ->assertJsonStructure(['data' => [['id', 'type', 'amount', 'date', 'description', 'account', 'currency']]]);
     });
 
-    /*
-        it('can show a transaction', function () {
-            $transaction = Transaction::factory()->for($this->user)->for($this->account)->for($this->category)->create();
-            $response = $this->getJson(route('transactions.show', $transaction));
-            $response->assertOk()->assertJsonStructure(['data']);
-        });
+    it('can show a transaction', function(){
+        $user = User::factory()->create();
+        $currency = Currency::factory()->create();
+        $account = Account::factory()->for($user)->for($currency)->create();
+        $category = Category::factory()->for($user)->create(['type' => 'income']);
+        $transaction = Transaction::factory()->for($user)->for($account)->for($category)->create();
 
-        it('can create a transaction', function () {
-            $data = [
-                'type' => 'income',
-                'amount' => 100.50,
-                'account_id' => $this->account->id,
-                'category_id' => $this->category->id,
-                'date' => now()->format('Y-m-d H:i:s'),
-                'description' => 'Test income',
-            ];
-            $response = $this->postJson(route('transactions.store'), $data);
-            $response->assertCreated()->assertJsonStructure(['data']);
-            $this->assertDatabaseHas('transactions', ['description' => 'Test income']);
-        });
+        $this->actingAs($user)
+            ->getJson(route('transactions.show', $transaction))
+            ->assertOk()
+            ->assertJsonStructure(['data' => ['id', 'type', 'amount', 'date', 'description', 'account', 'currency']]);
+    });
 
-        it('can update a transaction', function () {
-            $transaction = Transaction::factory()->for($this->user)->for($this->account)->for($this->category)->create();
-            $data = [
-                'type' => 'income',
-                'amount' => 200.00,
-                'account_id' => $this->account->id,
-                'category_id' => $this->category->id,
-                'date' => now()->format('Y-m-d H:i:s'),
-                'description' => 'Updated',
-            ];
-            $response = $this->putJson(route('transactions.update', $transaction), $data);
-            $response->assertOk()->assertJsonStructure(['data']);
-            $this->assertDatabaseHas('transactions', ['description' => 'Updated']);
-        });
+    it('cannot show a transaction for another user', function () {
+        $user1 = User::factory()->create();
+        $user2 = User::factory()->create();
+        $currency = Currency::factory()->create();
+        $account = Account::factory()->for($user1)->for($currency)->create();
+        $category = Category::factory()->for($user1)->create(['type' => 'income']);
+        $transaction = Transaction::factory()->for($user1)->for($account)->for($category)->create();
 
-        it('can delete a transaction', function () {
-            $transaction = Transaction::factory()->for($this->user)->for($this->account)->for($this->category)->create();
-            $response = $this->deleteJson(route('transactions.destroy', $transaction));
-            $response->assertOk()->assertJsonFragment(['message' => 'Transaction deleted successfully']);
-            $this->assertDatabaseMissing('transactions', ['id' => $transaction->id]);
-        });*/
+        $this->actingAs($user2)
+            ->getJson(route('transactions.show', $transaction))
+            ->assertForbidden();
+    });
+
+    it('can create a transaction', function () {
+        $user = User::factory()->create();
+        $currency = Currency::factory()->create();
+        $account = Account::factory()->for($user)->for($currency)->create();
+        $category = Category::factory()->for($user)->create(['type' => 'income']);
+
+        $data = [
+            'type' => 'income',
+            'amount' => 100.50,
+            'account_id' => $account->id,
+            'category_id' => $category->id,
+            'date' => now()->format('Y-m-d H:i:s'),
+            'description' => 'Test income',
+        ];
+
+        $this->actingAs($user)
+            ->postJson('/api/transactions', $data)
+            ->assertCreated()
+            ->assertJsonStructure(['data'])
+            ->assertJsonFragment(['description' => 'Test income']);
+
+        $this->assertDatabaseHas('transactions', ['description' => 'Test income']);
+    });
+
+    it('cannot create a transaction with invalid ammount', function () {
+        $user = User::factory()->create();
+        $currency = Currency::factory()->create();
+        $account = Account::factory()->for($user)->for($currency)->create();
+        $category = Category::factory()->for($user)->create(['type' => 'income']);
+
+        $data = [
+            'type' => 'income',
+            'amount' => -50.00, // Invalid amount
+            'account_id' => $account->id,
+            'category_id' => $category->id,
+            'date' => now()->format('Y-m-d H:i:s'),
+            'description' => 'Invalid transaction',
+        ];
+
+        $this->actingAs($user)
+            ->postJson('/api/transactions', $data)
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['amount']);
+    });
+
+    it('cannot create a transaction with missing fields', function () {
+        $user = User::factory()->create();
+        $currency = Currency::factory()->create();
+        $account = Account::factory()->for($user)->for($currency)->create();
+        $category = Category::factory()->for($user)->create(['type' => 'income']);
+
+        $data = [
+            'type' => 'income',
+            // Missing amount, account_id, category_id, date, description
+        ];
+
+        $this->actingAs($user)
+            ->postJson('/api/transactions', $data)
+            ->assertStatus(422);
+    });
+
+    it('can update a transaction', function () {
+        $user = User::factory()->create();
+        $currency = Currency::factory()->create();
+        $account = Account::factory()->for($user)->for($currency)->create();
+        $category = Category::factory()->for($user)->create(['type' => 'income']);
+        $transaction = Transaction::factory()->for($user)->for($account)->for($category)->create();
+
+        $data = [
+            'type' => 'income',
+            'amount' => 200.00,
+            'account_id' => $account->id,
+            'category_id' => $category->id,
+            'date' => now()->format('Y-m-d H:i:s'),
+            'description' => 'Updated',
+        ];
+
+        $this->actingAs($user)
+            ->putJson(route('transactions.update', $transaction), $data)
+            ->assertOk()
+            ->assertJsonStructure(['data'])
+            ->assertJsonFragment(['description' => 'Updated']);
+
+        $this->assertDatabaseHas('transactions', ['description' => 'Updated']);
+    });
+
+    it('can delete a transaction', function () {
+        $user = User::factory()->create();
+        $currency = Currency::factory()->create();
+        $account = Account::factory()->for($user)->for($currency)->create();
+        $category = Category::factory()->for($user)->create(['type' => 'income']);
+        $transaction = Transaction::factory()->for($user)->for($account)->for($category)->create();
+
+        $this->actingAs($user)
+            ->deleteJson(route('transactions.destroy', $transaction))
+            ->assertOk()
+            ->assertJsonFragment(['message' => 'Transaction deleted successfully']);
+
+        $this->assertDatabaseMissing('transactions', ['id' => $transaction->id]);
+    });
 });
 
