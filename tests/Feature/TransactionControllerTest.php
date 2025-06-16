@@ -1,15 +1,15 @@
 <?php
 
+use App\Models\Account;
+use App\Models\Category;
 use App\Models\Currency;
 use App\Models\Transaction;
 use App\Models\User;
-use App\Models\Account;
-use App\Models\Category;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-describe('TransactionsController', function () {
+describe('Transactions', function () {
 
     it('can list transactions', function () {
         $user = User::factory()->create();
@@ -24,7 +24,7 @@ describe('TransactionsController', function () {
             ->assertJsonStructure(['data' => [['id', 'type', 'amount', 'date', 'description', 'account', 'currency']]]);
     });
 
-    it('can show a transaction', function(){
+    it('can show a transaction', function () {
         $user = User::factory()->create();
         $currency = Currency::factory()->create();
         $account = Account::factory()->for($user)->for($currency)->create();
@@ -111,6 +111,48 @@ describe('TransactionsController', function () {
             ->assertStatus(422);
     });
 
+    it('cannot create a transaction for another user', function () {
+        $user1 = User::factory()->create();
+        $user2 = User::factory()->create();
+        $currency = Currency::factory()->create();
+        $account = Account::factory()->for($user1)->for($currency)->create();
+        $category = Category::factory()->for($user1)->create(['type' => 'income']);
+
+        $data = [
+            'type' => 'income',
+            'amount' => 100.00,
+            'account_id' => $account->id,
+            'category_id' => $category->id,
+            'date' => now()->format('Y-m-d H:i:s'),
+            'description' => 'Test income',
+        ];
+
+        $this->actingAs($user2)
+            ->postJson('/api/transactions', $data)
+            ->assertForbidden();
+    });
+
+    it('cannot create a transaction if category type does not match transaction type', function () {
+        $user = User::factory()->create();
+        $currency = Currency::factory()->create();
+        $account = Account::factory()->for($user)->for($currency)->create();
+        $category = Category::factory()->for($user)->create(['type' => 'expense']);
+
+        $data = [
+            'type' => 'income', // Does not match the type of the category
+            'amount' => 100.00,
+            'account_id' => $account->id,
+            'category_id' => $category->id,
+            'date' => now()->format('Y-m-d H:i:s'),
+            'description' => 'Test type mismatch',
+        ];
+
+        $this->actingAs($user)
+            ->postJson('/api/transactions', $data)
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['category_id']);
+    });
+
     it('can update a transaction', function () {
         $user = User::factory()->create();
         $currency = Currency::factory()->create();
@@ -151,4 +193,3 @@ describe('TransactionsController', function () {
         $this->assertDatabaseMissing('transactions', ['id' => $transaction->id]);
     });
 });
-
