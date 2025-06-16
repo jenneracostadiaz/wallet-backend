@@ -74,7 +74,7 @@ describe('Transactions', function () {
         $this->assertDatabaseHas('transactions', ['description' => 'Test income']);
     });
 
-    it('cannot create a transaction with invalid ammount', function () {
+    it('cannot create a transaction with invalid amount', function () {
         $user = User::factory()->create();
         $currency = Currency::factory()->create();
         $account = Account::factory()->for($user)->for($currency)->create();
@@ -178,6 +178,89 @@ describe('Transactions', function () {
         $this->assertDatabaseHas('transactions', ['description' => 'Updated']);
     });
 
+    it('cannot update a transaction with invalid amount', function () {
+        $user = User::factory()->create();
+        $currency = Currency::factory()->create();
+        $account = Account::factory()->for($user)->for($currency)->create();
+        $category = Category::factory()->for($user)->create(['type' => 'income']);
+        $transaction = Transaction::factory()->for($user)->for($account)->for($category)->create();
+
+        $data = [
+            'type' => 'income',
+            'amount' => -100.00, // Invalid amount
+            'account_id' => $account->id,
+            'category_id' => $category->id,
+            'date' => now()->format('Y-m-d H:i:s'),
+            'description' => 'Invalid update',
+        ];
+
+        $this->actingAs($user)
+            ->putJson(route('transactions.update', $transaction), $data)
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['amount']);
+    });
+
+    it('cannot update a transaction with missing fields', function () {
+        $user = User::factory()->create();
+        $currency = Currency::factory()->create();
+        $account = Account::factory()->for($user)->for($currency)->create();
+        $category = Category::factory()->for($user)->create(['type' => 'income']);
+        $transaction = Transaction::factory()->for($user)->for($account)->for($category)->create();
+
+        $data = [
+            'type' => 'income',
+            // Missing amount, account_id, category_id, date, description
+        ];
+
+        $this->actingAs($user)
+            ->putJson(route('transactions.update', $transaction), $data)
+            ->assertStatus(422);
+    });
+
+    it('cannot update a transaction for another user', function () {
+        $user1 = User::factory()->create();
+        $user2 = User::factory()->create();
+        $currency = Currency::factory()->create();
+        $account = Account::factory()->for($user1)->for($currency)->create();
+        $category = Category::factory()->for($user1)->create(['type' => 'income']);
+        $transaction = Transaction::factory()->for($user1)->for($account)->for($category)->create();
+
+        $data = [
+            'type' => 'income',
+            'amount' => 200.00,
+            'account_id' => $account->id,
+            'category_id' => $category->id,
+            'date' => now()->format('Y-m-d H:i:s'),
+            'description' => 'Updated by another user',
+        ];
+
+        $this->actingAs($user2)
+            ->putJson(route('transactions.update', $transaction), $data)
+            ->assertForbidden();
+    });
+
+    it('cannot update a transaction if category type does not match transaction type', function () {
+        $user = User::factory()->create();
+        $currency = Currency::factory()->create();
+        $account = Account::factory()->for($user)->for($currency)->create();
+        $category = Category::factory()->for($user)->create(['type' => 'expense']);
+        $transaction = Transaction::factory()->for($user)->for($account)->for($category)->create();
+
+        $data = [
+            'type' => 'income', // Does not match the type of the category
+            'amount' => 200.00,
+            'account_id' => $account->id,
+            'category_id' => $category->id,
+            'date' => now()->format('Y-m-d H:i:s'),
+            'description' => 'Type mismatch update',
+        ];
+
+        $this->actingAs($user)
+            ->putJson(route('transactions.update', $transaction), $data)
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['category_id']);
+    });
+
     it('can delete a transaction', function () {
         $user = User::factory()->create();
         $currency = Currency::factory()->create();
@@ -191,5 +274,18 @@ describe('Transactions', function () {
             ->assertJsonFragment(['message' => 'Transaction deleted successfully']);
 
         $this->assertDatabaseMissing('transactions', ['id' => $transaction->id]);
+    });
+
+    it('cannot delete a transaction for another user', function () {
+        $user1 = User::factory()->create();
+        $user2 = User::factory()->create();
+        $currency = Currency::factory()->create();
+        $account = Account::factory()->for($user1)->for($currency)->create();
+        $category = Category::factory()->for($user1)->create(['type' => 'income']);
+        $transaction = Transaction::factory()->for($user1)->for($account)->for($category)->create();
+
+        $this->actingAs($user2)
+            ->deleteJson(route('transactions.destroy', $transaction))
+            ->assertForbidden();
     });
 });
