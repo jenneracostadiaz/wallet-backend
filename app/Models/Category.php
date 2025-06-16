@@ -8,6 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $type
+ * @property string|null $icon
+ * @property int|null $parent_id
+ * @property int $user_id
+ * @property int $order
+ */
 class Category extends Model
 {
     /** @use HasFactory<CategoryFactory> */

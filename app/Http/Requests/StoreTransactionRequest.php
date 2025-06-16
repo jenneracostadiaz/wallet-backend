@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Account;
 use App\Models\Category;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
@@ -15,7 +16,15 @@ class StoreTransactionRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        $user = $this->user();
+        $account = Account::query()->find($this->input('account_id'));
+        $category = Category::query()->find($this->input('category_id'));
+
+        if (! $account || ! $category) {
+            return true;
+        }
+
+        return $account->user_id === $user->id && $category->user_id === $user->id;
     }
 
     /**
@@ -28,14 +37,17 @@ class StoreTransactionRequest extends FormRequest
         return [
             'type' => 'required|in:income,expense,transfer',
             'amount' => 'required|numeric|min:0.01',
-            'account_id' => 'required|exists:accounts,id',
+            'account_id' => [
+                'required',
+                'exists:accounts,id',
+            ],
             'category_id' => [
                 'required',
                 'exists:categories,id',
                 function ($attribute, $value, $fail) {
                     $category = Category::query()->find($value);
                     if ($category && $category->type !== $this->input('type')) {
-                        $fail('El tipo de la categoría debe coincidir con el tipo de la transacción.');
+                        $fail('The category type must match the transaction type.');
                     }
                 },
             ],
