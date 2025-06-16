@@ -73,4 +73,3 @@ describe('Categories', function () {
             ->assertForbidden();
     });
 });
-
