@@ -7,7 +7,6 @@ use App\Models\User;
 
 class TransactionPolicy
 {
-
     /**
      * Determine whether the user can view the model.
      */
