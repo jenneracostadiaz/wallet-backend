@@ -4,8 +4,11 @@ namespace App\Providers;
 
 use App\Models\Account;
 use App\Policies\AccountPolicy;
+use Dedoc\Scramble\Scramble;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Routing\Route;
+use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,5 +27,9 @@ class AppServiceProvider extends ServiceProvider
     {
         // Registrar policies
         Gate::policy(Account::class, AccountPolicy::class);
+        Scramble::configure()
+            ->routes(function (Route $route) {
+                return Str::startsWith($route->uri, 'api/');
+            });
     }
 }
