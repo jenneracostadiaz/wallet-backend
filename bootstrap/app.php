@@ -17,6 +17,12 @@ return Application::configure(basePath: dirname(__DIR__))
             EnsureFrontendRequestsAreStateful::class,
         ]);
 
+        $middleware->validateCsrfTokens(except: [
+            'api/*',
+            '/register',
+            '/login',
+        ]);
+
         $middleware->alias([
             'auth.sanctum' => EnsureFrontendRequestsAreStateful::class,
         ]);
