@@ -27,9 +27,5 @@ class AppServiceProvider extends ServiceProvider
     {
         // Registrar policies
         Gate::policy(Account::class, AccountPolicy::class);
-        Scramble::configure()
-            ->routes(function (Route $route) {
-                return Str::startsWith($route->uri, 'api/');
-            });
     }
 }
