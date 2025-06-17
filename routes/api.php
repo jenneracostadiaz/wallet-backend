@@ -35,5 +35,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('dashboard')->group(function () {
         Route::get('/', [DashboardController::class, 'index']);
         Route::get('/balance', [DashboardController::class, 'balance']);
+        Route::get('/monthly-report', [DashboardController::class, 'monthlyReport']);
     });
 });

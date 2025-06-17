@@ -32,4 +32,20 @@ class DashboardController extends Controller
             'data' => $balance,
         ]);
     }
+
+    public function monthlyReport(Request $request): JsonResponse
+    {
+        $request->validate([
+            'month' => 'nullable|date_format:Y-m',
+        ]);
+
+        $dashboardService = new DashboardService($request->user()->id);
+        $summary = $dashboardService->getMonthlyBasicSummary($request->month);
+
+        return response()->json([
+            'success' => true,
+            'data' => $summary,
+        ]);
+
+    }
 }
