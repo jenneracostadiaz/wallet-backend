@@ -74,4 +74,15 @@ class DashboardController extends Controller
             'data' => $comparison,
         ]);
     }
+
+    public function quickStats(Request $request): JsonResponse
+    {
+        $dashboardService = new DashboardService($request->user()->id);
+        $stats = $dashboardService->getQuickStats();
+
+        return response()->json([
+            'success' => true,
+            'data' => $stats,
+        ]);
+    }
 }
