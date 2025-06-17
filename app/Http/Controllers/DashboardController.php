@@ -48,4 +48,19 @@ class DashboardController extends Controller
         ]);
 
     }
+
+    public function latestTransactions(Request $request): JsonResponse
+    {
+        $request->validate([
+            'limit' => 'nullable|integer|min:1|max:100',
+        ]);
+
+        $dashboardService = new DashboardService($request->user()->id);
+        $transactions = $dashboardService->getLatestTransactions($request->limit ?? 10);
+
+        return response()->json([
+            'success' => true,
+            'data' => $transactions,
+        ]);
+    }
 }
