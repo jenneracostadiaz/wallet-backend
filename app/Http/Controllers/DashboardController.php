@@ -22,5 +22,14 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function balance(Request $request): JsonResponse
+    {
+        $dashboardService = new DashboardService($request->user()->id);
+        $balance = $dashboardService->getCurrentTotalBalance();
 
+        return response()->json([
+            'success' => true,
+            'data' => $balance,
+        ]);
+    }
 }
