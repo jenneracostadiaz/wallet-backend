@@ -4,6 +4,7 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CurrencyController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 
@@ -30,4 +31,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource('categories', CategoryController::class)->except(['create', 'edit']);
     Route::resource('transactions', TransactionController::class)
         ->except(['create', 'edit']);
+
+    Route::prefix('dashboard')->group(function () {
+        Route::get('/', [DashboardController::class, 'index']);
+    });
 });
