@@ -63,4 +63,15 @@ class DashboardController extends Controller
             'data' => $transactions,
         ]);
     }
+
+    public function monthlyComparison(Request $request): JsonResponse
+    {
+        $dashboardService = new DashboardService($request->user()->id);
+        $comparison = $dashboardService->getMonthlyComparison();
+
+        return response()->json([
+            'success' => true,
+            'data' => $comparison,
+        ]);
+    }
 }

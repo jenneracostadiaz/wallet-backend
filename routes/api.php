@@ -37,5 +37,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/balance', [DashboardController::class, 'balance']);
         Route::get('/monthly-report', [DashboardController::class, 'monthlyReport']);
         Route::get('/latest-transactions', [DashboardController::class, 'latestTransactions']);
+        Route::get('/monthly-comparison', [DashboardController::class, 'monthlyComparison']);
     });
 });
