@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property $user_id
+ * @property int $id
  */
 class Account extends Model
 {
