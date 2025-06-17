@@ -4,8 +4,11 @@ namespace App\Providers;
 
 use App\Models\Account;
 use App\Policies\AccountPolicy;
+use Dedoc\Scramble\Scramble;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Routing\Route;
+use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
