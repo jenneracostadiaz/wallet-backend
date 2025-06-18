@@ -16,13 +16,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/logout-all', [AuthController::class, 'logoutAll']);
     Route::post('/refresh-token', [AuthController::class, 'refresh']);
-
-    Route::get('/dashboard', function () {
-        return response()->json([
-            'message' => 'Welcome to dashboard!',
-            'data' => 'This is protected content',
-        ]);
-    });
+    
 
     Route::resource('currencies', CurrencyController::class)
         ->only(['index', 'show']);
