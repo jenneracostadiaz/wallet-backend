@@ -20,9 +20,8 @@ test('user can register successfully', function () {
         ->assertJsonStructure([
             'message',
             'user' => ['id', 'name', 'email', 'email_verified_at'],
-            'access_token',
+            'token',
             'token_type',
-            'expires_in',
         ])
         ->assertJson([
             'message' => 'User registered successfully',
