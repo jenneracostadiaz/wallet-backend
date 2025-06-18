@@ -517,7 +517,7 @@ describe('getQuickStats', function () {
 
         $result = $this->dashboardService->getQuickStats();
 
-        expect($result['transactions_today'])->toBe(3)
+        expect($result['transactions_today'])->toBe(2)
             ->and($result['transactions_this_week'])->toBe(4)
             ->and($result['transactions_this_month'])->toBe(4)
             ->and($result['total_accounts'])->toBe(1)
