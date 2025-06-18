@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Password;
 
 class AuthController extends Controller
 {
@@ -96,19 +97,16 @@ class AuthController extends Controller
         ]);
     }
 
-    public function resetPassword(Request $request): JsonResponse
+    public function forgotPassword(Request $request): JsonResponse
     {
-        $request->validate([
-            'email' => 'required|email|exists:users,email',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+        $request->validate(['email' => 'required|email']);
 
-        $user = User::query()->where('email', $request->email)->first();
-        $user->password = Hash::make($request->password);
-        $user->save();
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
 
-        return response()->json([
-            'message' => 'Password reset successfully',
-        ]);
+        return $status === Password::ResetLinkSent
+            ? response()->json(['message' => 'Password reset link sent successfully.'])
+            : response()->json(['message' => 'Failed to send password reset link.'], 500);
     }
 }
