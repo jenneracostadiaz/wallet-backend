@@ -95,4 +95,20 @@ class AuthController extends Controller
             'expires_in' => 30 * 24 * 60 * 60,
         ]);
     }
+
+    public function resetPassword(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = User::query()->where('email', $request->email)->first();
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return response()->json([
+            'message' => 'Password reset successfully',
+        ]);
+    }
 }
