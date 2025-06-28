@@ -185,16 +185,9 @@ readonly class DashboardService
     private function getAccountsSummary(): array
     {
         return Account::query()->where('user_id', $this->userId)
-            ->selectRaw('type, COUNT(*) as count, SUM(balance) as total_balance')
+            ->with('currency')
             ->groupBy('type')
             ->get()
-            ->map(function ($item) {
-                return [
-                    'type' => $item->type,
-                    'count' => $item->count,
-                    'total_balance' => $item->total_balance,
-                ];
-            })
             ->toArray();
     }
 
