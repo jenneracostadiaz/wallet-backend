@@ -37,7 +37,14 @@ readonly class DashboardService
 
             // Assuming the first currency is the primary one for the overall total
             if (empty($totalInPrimaryCurrency)) {
-                $totalInPrimaryCurrency = $total;
+                $totalInPrimaryCurrency = [
+                    'currency' => [
+                        'code' => $currency->code,
+                        'symbol' => $currency->symbol,
+                        'name' => $currency->name,
+                    ],
+                    'total' => $total,
+                ];
             }
         }
 
