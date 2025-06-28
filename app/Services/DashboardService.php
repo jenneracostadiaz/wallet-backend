@@ -35,7 +35,6 @@ readonly class DashboardService
                 'accounts_count' => $accountsGroup->count(),
             ];
 
-            // Assuming the first currency is the primary one for the overall total
             if (empty($totalInPrimaryCurrency)) {
                 $totalInPrimaryCurrency = [
                     'currency' => [
@@ -43,7 +42,7 @@ readonly class DashboardService
                         'symbol' => $currency->symbol,
                         'name' => $currency->name,
                     ],
-                    'total' => $total,
+                    'total' => number_format($total, $currency->decimal_places),
                 ];
             }
         }
