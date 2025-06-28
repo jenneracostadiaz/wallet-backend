@@ -91,6 +91,19 @@ readonly class DashboardService
             });
         }
 
+        // Obtener moneda principal igual que en getCurrentTotalBalance
+        $accounts = Account::query()->where('user_id', $this->userId)
+            ->with('currency')
+            ->get();
+        $primaryCurrency = $accounts->first() ? $accounts->first()->currency : null;
+        $currencyArr = $primaryCurrency ? [
+            'code' => $primaryCurrency->code,
+            'symbol' => $primaryCurrency->symbol,
+            'name' => $primaryCurrency->name,
+            'decimal_places' => $primaryCurrency->decimal_places,
+        ] : null;
+        $decimals = $primaryCurrency ? $primaryCurrency->decimal_places : 2;
+
         return [
             'period' => [
                 'month' => $date->format('Y-m'),
@@ -98,11 +111,12 @@ readonly class DashboardService
                 'start_date' => $startOfMonth->format('Y-m-d'),
                 'end_date' => $endOfMonth->format('Y-m-d'),
             ],
+            'currency' => $currencyArr,
             'summary' => [
-                'total_income' => $income,
-                'total_expenses' => $expenses,
-                'total_transfers' => $transfers,
-                'net_income' => $income - $expenses,
+                'total_income' => number_format($income, $decimals),
+                'total_expenses' => number_format($expenses, $decimals),
+                'total_transfers' => number_format($transfers, $decimals),
+                'net_income' => number_format($income - $expenses, $decimals),
                 'transactions_count' => $transactions->count(),
             ],
             'expenses_by_category' => $expensesByCategory->take(10), // Top 10 categorías
