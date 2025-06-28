@@ -186,8 +186,21 @@ readonly class DashboardService
     {
         return Account::query()->where('user_id', $this->userId)
             ->with('currency')
-            ->groupBy('type')
             ->get()
+            ->map(function ($item) {
+                return [
+                    'name' => $item->name,
+                    'type' => $item->type,
+                    'balance' => number_format($item->balance, $item->currency->decimal_places),
+                    'description' => $item->description,
+                    'color' => $item->color,
+                    "currency" => [
+                        'code' => $item->currency->code,
+                        'symbol' => $item->currency->symbol,
+                        'name' => $item->currency->name,
+                    ],
+                ];
+            })
             ->toArray();
     }
 
