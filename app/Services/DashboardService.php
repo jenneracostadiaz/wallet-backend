@@ -169,12 +169,12 @@ readonly class DashboardService
         $currentSummary = $this->getMonthlyBasicSummary($currentMonth->format('Y-m'));
         $previousSummary = $this->getMonthlyBasicSummary($previousMonth->format('Y-m'));
 
-        $incomeOld = (float)str_replace(',', '', $previousSummary['summary']['total_income']);
-        $incomeNew = (float)str_replace(',', '', $currentSummary['summary']['total_income']);
-        $expenseOld = (float)str_replace(',', '', $previousSummary['summary']['total_expenses']);
-        $expenseNew = (float)str_replace(',', '', $currentSummary['summary']['total_expenses']);
-        $netOld = (float)str_replace(',', '', $previousSummary['summary']['net_income']);
-        $netNew = (float)str_replace(',', '', $currentSummary['summary']['net_income']);
+        $incomeOld = (float) str_replace(',', '', $previousSummary['summary']['total_income']);
+        $incomeNew = (float) str_replace(',', '', $currentSummary['summary']['total_income']);
+        $expenseOld = (float) str_replace(',', '', $previousSummary['summary']['total_expenses']);
+        $expenseNew = (float) str_replace(',', '', $currentSummary['summary']['total_expenses']);
+        $netOld = (float) str_replace(',', '', $previousSummary['summary']['net_income']);
+        $netNew = (float) str_replace(',', '', $currentSummary['summary']['net_income']);
 
         return [
             'current_month' => $currentSummary,
@@ -219,7 +219,7 @@ readonly class DashboardService
                     'balance' => number_format($item->balance, $item->currency->decimal_places),
                     'description' => $item->description,
                     'color' => $item->color,
-                    "currency" => [
+                    'currency' => [
                         'code' => $item->currency->code,
                         'symbol' => $item->currency->symbol,
                         'name' => $item->currency->name,
