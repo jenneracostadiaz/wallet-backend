@@ -56,16 +56,16 @@ describe('getCurrentTotalBalance', function () {
             ],
             'total' => '1,500.75',
         ])
-        ->and($result['balances_by_currency'])->toHaveCount(1)
-        ->and($result['balances_by_currency'][0])
-        ->toMatchArray([
-            'currency' => [
-                'code' => 'USD',
-                'symbol' => '$',
-                'name' => $this->currency->name,
-            ],
-            'total' => '1,500.75',
-        ]);
+            ->and($result['balances_by_currency'])->toHaveCount(1)
+            ->and($result['balances_by_currency'][0])
+            ->toMatchArray([
+                'currency' => [
+                    'code' => 'USD',
+                    'symbol' => '$',
+                    'name' => $this->currency->name,
+                ],
+                'total' => '1,500.75',
+            ]);
     });
 
     it('returns correct balance for multiple currencies', function () {
@@ -128,7 +128,7 @@ describe('getCurrentTotalBalance', function () {
                     'name' => $this->currency->name,
                 ],
                 'total' => '1,000.00',
-        ])
+            ])
             ->and($result['balances_by_currency'][0]['accounts_count'])->toBe(1);
     });
 
