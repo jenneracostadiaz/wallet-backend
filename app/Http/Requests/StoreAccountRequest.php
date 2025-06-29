@@ -21,6 +21,7 @@ class StoreAccountRequest extends FormRequest
             'balance' => 'required|numeric|min:0',
             'currency_id' => 'required|exists:currencies,id',
             'description' => 'nullable|string|max:1000',
+            'color' => 'nullable|string|max:7',
         ];
     }
 
@@ -40,6 +41,8 @@ class StoreAccountRequest extends FormRequest
             'currency_id.exists' => 'The selected currency does not exist.',
             'description.string' => 'The description must be a string.',
             'description.max' => 'The description may not be greater than 1000 characters.',
+            'color.string' => 'The color must be a string.',
+            'color.max' => 'The color may not be greater than 7 characters.',
         ];
     }
 
