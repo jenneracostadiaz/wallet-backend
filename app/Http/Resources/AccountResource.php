@@ -34,6 +34,7 @@ class AccountResource extends JsonResource
                 'id' => $this->currency->id,
                 'code' => $this->currency->code,
                 'name' => $this->currency->name,
+                'symbol' => $this->currency->symbol,
             ],
             'description' => $this->description,
             'order' => $this->order,
