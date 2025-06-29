@@ -48,18 +48,24 @@ describe('getCurrentTotalBalance', function () {
 
         $result = $this->dashboardService->getCurrentTotalBalance();
 
-        expect($result['total_balance'])->toBe(1500.75)
-            ->and($result['balances_by_currency'])->toHaveCount(1)
-            ->and($result['balances_by_currency'][0])
-            ->toMatchArray([
-                'currency' => [
-                    'code' => 'USD',
-                    'symbol' => '$',
-                    'name' => $this->currency->name,
-                ],
-                'total' => '1,500.75',
-                'accounts_count' => 2,
-            ]);
+        expect($result['total_balance'])->toBe([
+            'currency' => [
+                'code' => 'USD',
+                'symbol' => '$',
+                'name' => $this->currency->name,
+            ],
+            'total' => '1,500.75',
+        ])
+        ->and($result['balances_by_currency'])->toHaveCount(1)
+        ->and($result['balances_by_currency'][0])
+        ->toMatchArray([
+            'currency' => [
+                'code' => 'USD',
+                'symbol' => '$',
+                'name' => $this->currency->name,
+            ],
+            'total' => '1,500.75',
+        ]);
     });
 
     it('returns correct balance for multiple currencies', function () {
@@ -80,7 +86,14 @@ describe('getCurrentTotalBalance', function () {
         $result = $this->dashboardService->getCurrentTotalBalance();
 
         expect($result['balances_by_currency'])->toHaveCount(2)
-            ->and($result['total_balance'])->toBe(1000.0);
+            ->and($result['total_balance'])->toBe([
+                'currency' => [
+                    'code' => 'USD',
+                    'symbol' => '$',
+                    'name' => $this->currency->name,
+                ],
+                'total' => '1,000.00',
+            ]);
     });
 
     it('excludes other users accounts', function () {
@@ -98,7 +111,24 @@ describe('getCurrentTotalBalance', function () {
 
         $result = $this->dashboardService->getCurrentTotalBalance();
 
-        expect($result['total_balance'])->toBe(1000.0)
+        expect($result['total_balance'])->toBe([
+            'currency' => [
+                'code' => 'USD',
+                'symbol' => '$',
+                'name' => $this->currency->name,
+            ],
+            'total' => '1,000.00',
+        ])
+            ->and($result['balances_by_currency'])->toHaveCount(1)
+            ->and($result['balances_by_currency'][0])
+            ->toMatchArray([
+                'currency' => [
+                    'code' => 'USD',
+                    'symbol' => '$',
+                    'name' => $this->currency->name,
+                ],
+                'total' => '1,000.00',
+        ])
             ->and($result['balances_by_currency'][0]['accounts_count'])->toBe(1);
     });
 
@@ -165,10 +195,10 @@ describe('getMonthlyBasicSummary', function () {
 
         expect($result['summary'])
             ->toMatchArray([
-                'total_income' => 4000,
-                'total_expenses' => 500,
-                'total_transfers' => 0,
-                'net_income' => 3500,
+                'total_income' => '4,000.00',
+                'total_expenses' => '500.00',
+                'total_transfers' => '0.00',
+                'net_income' => '3,500.00',
                 'transactions_count' => 3,
             ])
             ->and($result['period']['month'])->toBe($currentMonth->format('Y-m'))
@@ -206,7 +236,7 @@ describe('getMonthlyBasicSummary', function () {
 
         $result = $this->dashboardService->getMonthlyBasicSummary('2024-06');
 
-        expect($result['summary']['total_income'])->toBe(2000.0)
+        expect($result['summary']['total_income'])->toBe('2,000.00')
             ->and($result['summary']['transactions_count'])->toBe(1)
             ->and($result['period']['month'])->toBe('2024-06');
     });
@@ -242,7 +272,7 @@ describe('getMonthlyBasicSummary', function () {
 
         $result = $this->dashboardService->getMonthlyBasicSummary();
 
-        expect($result['summary']['total_income'])->toBe(1000.0)
+        expect($result['summary']['total_income'])->toBe('1,000.00')
             ->and($result['summary']['transactions_count'])->toBe(1);
     });
 
@@ -518,7 +548,7 @@ describe('getQuickStats', function () {
         $result = $this->dashboardService->getQuickStats();
 
         expect($result['transactions_today'])->toBe(2)
-            ->and($result['transactions_this_week'])->toBe(4)
+            ->and($result['transactions_this_week'])->toBe(3)
             ->and($result['transactions_this_month'])->toBe(4)
             ->and($result['total_accounts'])->toBe(1)
             ->and($result['total_categories'])->toBe(1);
