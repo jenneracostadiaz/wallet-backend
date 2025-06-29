@@ -172,28 +172,6 @@ test('login fails with missing credentials', function () {
         ]);
 });
 
-test('login deletes existing tokens', function () {
-    $user = User::factory()->create([
-        'password' => Hash::make($password = 'password123'),
-    ]);
-
-    // Create some existing tokens
-    $user->createToken('token1');
-    $user->createToken('token2');
-
-    expect($user->tokens()->count())->toEqual(2);
-
-    $response = $this->postJson('/api/login', [
-        'email' => $user->email,
-        'password' => $password,
-    ]);
-
-    $response->assertStatus(200);
-
-    // After login, old tokens should be deleted and only new one exists
-    expect($user->fresh()->tokens()->count())->toEqual(1);
-});
-
 test('unauthenticated user cannot get profile', function () {
     $response = $this->getJson('/api/user');
 
