@@ -31,7 +31,6 @@ class CategoryResource extends JsonResource
             'subcategories' => SubcategoryResource::collection($this->whenLoaded('subcategories')),
             'parent_id' => $this->parent_id,
             'user_id' => $this->user_id,
-            'order' => $this->order,
         ];
     }
 }
