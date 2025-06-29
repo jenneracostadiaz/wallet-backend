@@ -143,11 +143,16 @@ readonly class DashboardService
                 'type' => $transaction->type,
                 'account' => [
                     'name' => $transaction->account->name,
+                    'color' => $transaction->account->color,
                     'currency' => $transaction->account->currency->symbol,
                 ],
                 'category' => $transaction->category ? [
                     'name' => $transaction->category->name,
                     'icon' => $transaction->category->icon,
+                    'parent' => $transaction->category->parent ? [
+                        'name' => $transaction->category->parent->name,
+                        'icon' => $transaction->category->parent->icon,
+                    ] : null,
                 ] : null,
                 'to_account' => $transaction->toAccount ? [
                     'name' => $transaction->toAccount->name,
