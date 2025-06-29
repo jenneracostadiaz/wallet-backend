@@ -169,21 +169,28 @@ readonly class DashboardService
         $currentSummary = $this->getMonthlyBasicSummary($currentMonth->format('Y-m'));
         $previousSummary = $this->getMonthlyBasicSummary($previousMonth->format('Y-m'));
 
+        $incomeOld = (float)str_replace(',', '', $previousSummary['summary']['total_income']);
+        $incomeNew = (float)str_replace(',', '', $currentSummary['summary']['total_income']);
+        $expenseOld = (float)str_replace(',', '', $previousSummary['summary']['total_expenses']);
+        $expenseNew = (float)str_replace(',', '', $currentSummary['summary']['total_expenses']);
+        $netOld = (float)str_replace(',', '', $previousSummary['summary']['net_income']);
+        $netNew = (float)str_replace(',', '', $currentSummary['summary']['net_income']);
+
         return [
             'current_month' => $currentSummary,
             'previous_month' => $previousSummary,
             'comparison' => [
                 'income_change' => $this->calculatePercentageChange(
-                    $previousSummary['summary']['total_income'],
-                    $currentSummary['summary']['total_income']
+                    $incomeOld,
+                    $incomeNew
                 ),
                 'expense_change' => $this->calculatePercentageChange(
-                    $previousSummary['summary']['total_expenses'],
-                    $currentSummary['summary']['total_expenses']
+                    $expenseOld,
+                    $expenseNew
                 ),
                 'net_income_change' => $this->calculatePercentageChange(
-                    $previousSummary['summary']['net_income'],
-                    $currentSummary['summary']['net_income']
+                    $netOld,
+                    $netNew
                 ),
             ],
         ];
