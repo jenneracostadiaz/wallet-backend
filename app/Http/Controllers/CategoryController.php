@@ -40,7 +40,7 @@ class CategoryController extends Controller
             ->setStatusCode(201);
     }
 
-    public function update(UpdateCategoryRequest $request, Category $category)
+    public function update(UpdateCategoryRequest $request, Category $category): CategoryResource
     {
         $this->authorize('update', $category);
 
@@ -49,7 +49,7 @@ class CategoryController extends Controller
         return new CategoryResource($category->load('subcategories'));
     }
 
-    public function destroy(Category $category)
+    public function destroy(Category $category): JsonResponse
     {
         $this->authorize('delete', $category);
 
