@@ -10,6 +10,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property $name
  * @property $type
  * @property $balance
+ * @property $color
  * @property $currency
  * @property $description
  * @property $order
@@ -30,6 +31,7 @@ class AccountResource extends JsonResource
             'name' => $this->name,
             'type' => $this->type,
             'balance' => $this->balance,
+            'color' => $this->color,
             'currency' => [
                 'id' => $this->currency->id,
                 'code' => $this->currency->code,
