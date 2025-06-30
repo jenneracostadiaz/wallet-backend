@@ -154,6 +154,11 @@ readonly class DashboardService
                         'icon' => $transaction->category->parent->icon,
                     ] : null,
                 ] : null,
+                'currency' => [
+                    'code' => $transaction->account->currency->code,
+                    'symbol' => $transaction->account->currency->symbol,
+                    'name' => $transaction->account->currency->name,
+                ],
                 'to_account' => $transaction->toAccount ? [
                     'name' => $transaction->toAccount->name,
                 ] : null,
@@ -214,6 +219,7 @@ readonly class DashboardService
             ->get()
             ->map(function ($item) {
                 return [
+                    'id' => $item->id,
                     'name' => $item->name,
                     'type' => $item->type,
                     'balance' => number_format($item->balance, $item->currency->decimal_places),
