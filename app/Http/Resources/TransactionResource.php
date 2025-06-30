@@ -12,6 +12,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property $date
  * @property $description
  * @property $account
+ * @property $category_id
  * @property $category
  * @property $currency
  */
@@ -30,6 +31,7 @@ class TransactionResource extends JsonResource
             'amount' => $this->amount,
             'date' => $this->date->toDateTimeString(),
             'description' => $this->description,
+            'category_id' => $this->category_id,
             'category' => [
                 'id' => $this->category->id,
                 'name' => $this->category->name,
@@ -41,6 +43,7 @@ class TransactionResource extends JsonResource
                 'name' => $this->account->name,
                 'type' => $this->account->type,
                 'balance' => $this->account->balance,
+                'color' => $this->account->color,
             ],
             'currency' => [
                 'id' => $this->account->currency->id,
