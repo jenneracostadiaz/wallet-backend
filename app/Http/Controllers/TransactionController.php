@@ -23,6 +23,8 @@ class TransactionController extends Controller
             ->when($request->filled('account_id'), fn ($q) => $q->fromAccount($request->input('account_id')))
             ->when($request->filled('date_from') || $request->filled('date_to'), fn ($q) => $q->betweenDates($request->input('date_from'), $request->input('date_to')))
             ->when($request->filled('type'), fn ($q) => $q->ofType($request->input('type')))
+            ->orderBy('date', 'desc')
+            ->orderBy('created_at', 'desc')
             ->withRelations();
 
         return TransactionResource::collection($transactions->paginate());
