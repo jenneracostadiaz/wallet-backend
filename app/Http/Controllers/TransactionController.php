@@ -27,7 +27,7 @@ class TransactionController extends Controller
             ->orderBy('created_at', 'desc')
             ->withRelations();
 
-        return TransactionResource::collection($transactions->paginate());
+        return TransactionResource::collection($transactions->get());
     }
 
     public function show(Transaction $transaction)
