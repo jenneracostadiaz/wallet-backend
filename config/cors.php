@@ -3,7 +3,7 @@
 return [
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
     'allowed_methods' => ['*'],
-    'allowed_origins' => ['http://localhost:3000'], // Tu URL de NextJS
+    'allowed_origins' => ['http://localhost:3000', 'https://wallet.jenner.pe'], // Tu URL de NextJS
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
     'exposed_headers' => [],
