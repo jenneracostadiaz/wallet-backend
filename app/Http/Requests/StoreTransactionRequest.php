@@ -41,6 +41,18 @@ class StoreTransactionRequest extends FormRequest
                 'required',
                 'exists:accounts,id',
             ],
+            'to_account_id' => [
+                'required_if:type,transfer',
+                'exclude_unless:type,transfer',
+                'exists:accounts,id',
+                function ($attribute, $value, $fail) {
+                    if ($this->input('type') === 'transfer') {
+                        if ($value == $this->input('account_id')) {
+                            $fail('The destination account must be different from the origin account.');
+                        }
+                    }
+                },
+            ],
             'category_id' => [
                 'required',
                 'exists:categories,id',
@@ -71,6 +83,9 @@ class StoreTransactionRequest extends FormRequest
             'amount.min' => 'The amount must be at least 0.01.',
             'account_id.required' => 'The account is required.',
             'account_id.exists' => 'The selected account does not exist.',
+            'to_account_id.required_if' => 'The destination account is required for transfers.',
+            'to_account_id.exclude_unless' => 'The destination account is required for transfers.',
+            'to_account_id.exists' => 'The selected destination account does not exist.',
             'category_id.required' => 'The category is required.',
             'category_id.exists' => 'The selected category does not exist.',
             'date.date_format' => 'The date must be in the format Y-m-d H:i:s.',
