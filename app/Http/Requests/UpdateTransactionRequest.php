@@ -2,27 +2,12 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Account;
 use App\Models\Category;
 use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class UpdateTransactionRequest extends FormRequest
+class UpdateTransactionRequest extends BaseTransactionRequest
 {
-    public function authorize(): bool
-    {
-        $user = $this->user();
-        $account = Account::query()->find($this->input('account_id'));
-        $category = Category::query()->find($this->input('category_id'));
-
-        if (! $account || ! $category) {
-            return true;
-        }
-
-        return $account->user_id === $user->id && $category->user_id === $user->id;
-    }
-
     public function rules(): array
     {
         return [
