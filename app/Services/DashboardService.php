@@ -136,33 +136,38 @@ readonly class DashboardService
         return $transactions->map(function ($transaction) {
             return [
                 'id' => $transaction->id,
-                'amount' => $transaction->amount,
-                'description' => $transaction->description,
-                'date' => $transaction->date->format('Y-m-d H:i:s'),
-                'date_human' => $transaction->date->diffForHumans(),
                 'type' => $transaction->type,
-                'account' => [
-                    'name' => $transaction->account->name,
-                    'color' => $transaction->account->color,
-                    'currency' => $transaction->account->currency->symbol,
-                ],
-                'category' => $transaction->category ? [
+                'amount' => $transaction->amount,
+                'date' => $transaction->date->toDateTimeString(),
+                'description' => $transaction->description,
+                'category_id' => $transaction->category_id,
+                'category' => [
+                    'id' => $transaction->category->id,
                     'name' => $transaction->category->name,
+                    'type' => $transaction->category->type,
                     'icon' => $transaction->category->icon,
-                    'parent' => $transaction->category->parent ? [
-                        'name' => $transaction->category->parent->name,
-                        'icon' => $transaction->category->parent->icon,
-                    ] : null,
-                ] : null,
-                'currency' => [
-                    'code' => $transaction->account->currency->code,
-                    'symbol' => $transaction->account->currency->symbol,
-                    'name' => $transaction->account->currency->name,
                 ],
+                'account_id' => $transaction->account_id,
+                'account' => [
+                    'id' => $transaction->account->id,
+                    'name' => $transaction->account->name,
+                    'type' => $transaction->account->type,
+                    'balance' => number_format($transaction->account->balance, $transaction->account->currency->decimal_places),
+                    'color' => $transaction->account->color,
+                ],
+                'currency' => [
+                    'id' => $transaction->account->currency->id,
+                    'code' => $transaction->account->currency->code,
+                    'name' => $transaction->account->currency->name,
+                    'symbol' => $transaction->account->currency->symbol,
+                ],
+                'to_account_id' => $transaction->toAccount ? $transaction->toAccount->id : null,
                 'to_account' => $transaction->toAccount ? [
+                    'id' => $transaction->toAccount->id,
                     'name' => $transaction->toAccount->name,
+                    'type' => $transaction->toAccount->type,
+                    'balance' => number_format($transaction->toAccount->balance, $transaction->toAccount->currency->decimal_places),
                     'color' => $transaction->toAccount->color,
-                    'currency' => $transaction->toAccount->currency->symbol,
                 ] : null,
             ];
         })->toArray();
