@@ -371,7 +371,7 @@ describe('getLatestTransactions', function () {
 
         expect($result[0])
             ->toHaveKeys([
-                'id', 'amount', 'description', 'date', 'date_human',
+                'id', 'amount', 'description', 'date',
                 'type', 'account', 'category', 'to_account',
             ])
             ->and($result[0]['account']['name'])->toBe('Main Account')
