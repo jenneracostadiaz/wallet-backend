@@ -161,6 +161,8 @@ readonly class DashboardService
                 ],
                 'to_account' => $transaction->toAccount ? [
                     'name' => $transaction->toAccount->name,
+                    'color' => $transaction->toAccount->color,
+                    'currency' => $transaction->toAccount->currency->symbol,
                 ] : null,
             ];
         })->toArray();
