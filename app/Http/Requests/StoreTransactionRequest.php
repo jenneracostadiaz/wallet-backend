@@ -6,27 +6,10 @@ use App\Models\Account;
 use App\Models\Category;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class StoreTransactionRequest extends FormRequest
+class StoreTransactionRequest extends BaseTransactionRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
-    {
-        $user = $this->user();
-        $account = Account::query()->find($this->input('account_id'));
-        $category = Category::query()->find($this->input('category_id'));
-
-        if (! $account || ! $category) {
-            return true;
-        }
-
-        return $account->user_id === $user->id && $category->user_id === $user->id;
-    }
-
     /**
      * Get the validation rules that apply to the request.
      *
