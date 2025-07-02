@@ -50,6 +50,11 @@ class StoreTransactionRequest extends FormRequest
                         if ($value == $this->input('account_id')) {
                             $fail('The destination account must be different from the origin account.');
                         }
+                        $from = Account::query()->find($this->input('account_id'));
+                        $to = Account::query()->find($value);
+                        if ($from && $to && $from->currency_id !== $to->currency_id) {
+                            $fail('Transfers between accounts with different currencies are not allowed.');
+                        }
                     }
                 },
             ],
