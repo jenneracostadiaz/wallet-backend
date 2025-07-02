@@ -15,6 +15,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property $category_id
  * @property $category
  * @property $currency
+ * @property $toAccount
  */
 class TransactionResource extends JsonResource
 {
@@ -52,6 +53,14 @@ class TransactionResource extends JsonResource
                 'name' => $this->account->currency->name,
                 'symbol' => $this->account->currency->symbol,
             ],
+            'to_account_id' => $this->toAccount ? $this->toAccount->id : null,
+            'to_account' => $this->type === 'transfer' && $this->toAccount ? [
+                'id' => $this->toAccount->id,
+                'name' => $this->toAccount->name,
+                'type' => $this->toAccount->type,
+                'balance' => $this->toAccount->balance,
+                'color' => $this->toAccount->color,
+            ] : null,
         ];
     }
 }
