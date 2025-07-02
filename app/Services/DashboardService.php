@@ -119,7 +119,7 @@ readonly class DashboardService
                 'net_income' => number_format($income - $expenses, $decimals),
                 'transactions_count' => $transactions->count(),
             ],
-            'expenses_by_category' => $expensesByCategory->take(10), // Top 10 categorías
+            'expenses_by_category' => $expensesByCategory->take(10),
             'daily_balance' => $this->getDailyBalanceForMonth($startOfMonth, $endOfMonth),
         ];
     }
