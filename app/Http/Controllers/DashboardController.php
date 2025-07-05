@@ -25,10 +25,7 @@ class DashboardController extends Controller
         $dashboardService = new DashboardService($request->user()->id);
         $balance = $dashboardService->getCurrentTotalBalance();
 
-        return response()->json([
-            'success' => true,
-            'data' => $balance,
-        ]);
+        return response()->json($balance);
     }
 
     public function monthlyReport(Request $request): JsonResponse
@@ -40,10 +37,7 @@ class DashboardController extends Controller
         $dashboardService = new DashboardService($request->user()->id);
         $summary = $dashboardService->getMonthlyBasicSummary($request->month);
 
-        return response()->json([
-            'success' => true,
-            'data' => $summary,
-        ]);
+        return response()->json($summary);
 
     }
 
@@ -56,10 +50,7 @@ class DashboardController extends Controller
         $dashboardService = new DashboardService($request->user()->id);
         $transactions = $dashboardService->getLatestTransactions($request->limit ?? 10);
 
-        return response()->json([
-            'success' => true,
-            'data' => $transactions,
-        ]);
+        return response()->json($transactions);
     }
 
     public function monthlyComparison(Request $request): JsonResponse
