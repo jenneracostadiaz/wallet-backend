@@ -25,6 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('accounts/{account}/export-csv', [AccountController::class, 'exportCsv']);
     Route::resource('accounts', AccountController::class)->except(['create', 'edit']);
     Route::resource('categories', CategoryController::class)->except(['create', 'edit']);
+    Route::get('transactions/export-csv', [TransactionController::class, 'exportCsv']);
     Route::resource('transactions', TransactionController::class)
         ->except(['create', 'edit']);
 
