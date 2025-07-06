@@ -10,6 +10,7 @@ use App\Services\TransactionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
 class TransactionController extends Controller
@@ -82,5 +83,55 @@ class TransactionController extends Controller
             'message' => 'Transaction deleted successfully',
             'balance' => $balance,
         ]);
+    }
+
+    public function exportCsv(Request $request): StreamedResponse
+    {
+        $this->authorize('viewAny', Transaction::class);
+
+        $transactions = Transaction::forUser(auth()->id())
+            ->when($request->filled('category_id'), fn ($q) => $q->inCategory($request->input('category_id')))
+            ->when($request->filled('account_id'), fn ($q) => $q->fromAccount($request->input('account_id')))
+            ->when($request->filled('date_from') || $request->filled('date_to'), fn ($q) => $q->betweenDates($request->input('date_from'), $request->input('date_to')))
+            ->when($request->filled('type'), fn ($q) => $q->ofType($request->input('type')))
+            ->orderBy('date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->withRelations();
+
+        $fileName = 'transactions_' . now()->format('Y_m_d_H_i_s') . '.csv';
+
+        $headers = [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $columns = ['ID', 'Date', 'Currency', 'Amount', 'Type', 'Description', 'Category', 'Account'];
+
+        $callback = function() use($transactions, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            $transactions->chunk(1000, function ($chunk) use ($file) {
+                foreach ($chunk as $transaction) {
+                    fputcsv($file, [
+                        $transaction->id,
+                        $transaction->date->format('Y-m-d'),
+                        $transaction->account->currency->code ?? '',
+                        $transaction->amount,
+                        $transaction->type,
+                        $transaction->description,
+                        $transaction->category->name ?? '',
+                        $transaction->account->name ?? '',
+                    ]);
+                }
+            });
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }
