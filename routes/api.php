@@ -21,6 +21,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource('currencies', CurrencyController::class)
         ->only(['index', 'show']);
 
+    Route::get('accounts/{account}/export-pdf', [AccountController::class, 'exportPdf']);
+    Route::get('accounts/{account}/export-csv', [AccountController::class, 'exportCsv']);
     Route::resource('accounts', AccountController::class)->except(['create', 'edit']);
     Route::resource('categories', CategoryController::class)->except(['create', 'edit']);
     Route::resource('transactions', TransactionController::class)
