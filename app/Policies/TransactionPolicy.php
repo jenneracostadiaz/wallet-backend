@@ -2,11 +2,16 @@
 
 namespace App\Policies;
 
+use App\Models\Account;
 use App\Models\Transaction;
 use App\Models\User;
 
 class TransactionPolicy
 {
+    public function viewAny(User $user): bool
+    {
+        return true;
+    }
     /**
      * Determine whether the user can view the model.
      */
