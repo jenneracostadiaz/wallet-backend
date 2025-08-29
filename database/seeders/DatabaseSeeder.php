@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             AccountSeeder::class,
             CategorySeeder::class,
             TransactionSeeder::class,
+            ScheduledPaymentSeeder::class, // Agregar el nuevo seeder
         ]);
     }
 }
