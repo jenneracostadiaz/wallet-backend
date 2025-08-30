@@ -45,7 +45,7 @@ class ScheduledPaymentResource extends JsonResource
             'description' => $this->description,
             'payment_type' => $this->payment_type,
             'status' => $this->status,
-            'amount' => $this->amount,
+            'amount' => number_format($this->amount, 2, '.', ','),
             'color' => $this->color,
             'icon' => $this->icon,
             'start_date' => $this->start_date?->format('Y-m-d'),
@@ -55,7 +55,7 @@ class ScheduledPaymentResource extends JsonResource
             'order' => $this->order,
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
-            
+
             // Relationships
             'account' => $this->whenLoaded('account', function () {
                 return new AccountResource($this->account);
