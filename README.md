@@ -203,6 +203,13 @@ Every payment execution is tracked with:
 - GET /dashboard/monthly-comparison: Compare current month vs previous month metrics
 - GET /dashboard/quick-stats: Quick statistics (transactions count, accounts, categories)
 
+#### Scheduled Payments
+- GET /scheduled-payments: List scheduled payments with filtering and search
+- POST /scheduled-payments: Create new scheduled payment
+- GET /scheduled-payments/{id}: Get detailed scheduled payment information
+- PUT /scheduled-payments/{id}: Update scheduled payment
+- DELETE /scheduled-payments/{id}: Delete scheduled payment
+
 ### Dashboard Features
 
 The dashboard provides comprehensive financial insights:
@@ -231,8 +238,8 @@ The dashboard provides comprehensive financial insights:
 - **Transaction Export**: CSV export with filtering by category and account
 - **Dashboard Reports**: Complete financial reports with charts and analytics
 
-#### Scheduled Payments (Backend Implementation Complete)
-The scheduled payments system is fully implemented at the database and model level with comprehensive features:
+#### Scheduled Payments (Fully Implemented)
+The scheduled payments system is now fully implemented at both the database and API level with comprehensive features:
 
 **Models and Database**:
 - Complete database schema with migrations
@@ -240,14 +247,23 @@ The scheduled payments system is fully implemented at the database and model lev
 - Factories and seeders with realistic Spanish data
 - Comprehensive test coverage
 
+**API Endpoints**:
+- GET /scheduled-payments - List scheduled payments with filtering and search
+- POST /scheduled-payments - Create new scheduled payment
+- GET /scheduled-payments/{id} - Get detailed scheduled payment information
+- PUT /scheduled-payments/{id} - Update scheduled payment
+- DELETE /scheduled-payments/{id} - Delete scheduled payment
+
 **Available Features**:
 - Recurring payment scheduling (daily, weekly, monthly, yearly)
 - Debt management with installment tracking
 - One-time scheduled payments
 - Payment history with detailed status tracking
 - Flexible metadata storage for payment details
+- Advanced filtering by status, payment type, account, and category
+- Search functionality by name and description
 
-**Status**: Backend implementation complete, API endpoints pending
+**Status**: ✅ **Fully Implemented** - Backend and API complete
 
 **Usage Example**:
 ```php
@@ -297,18 +313,13 @@ $payment->paymentSchedule()->create([
 
 ### 🚧 Pending Implementation
 
-#### API Endpoints for Scheduled Payments
-- ⏳ **ScheduledPayment Controller**: CRUD operations for scheduled payments
-- ⏳ **PaymentSchedule Management**: API for payment frequency configuration
-- ⏳ **Debt Management API**: Endpoints for debt tracking and installment management
-- ⏳ **Payment History API**: Historical payment data and analytics
-- ⏳ **Payment Processing**: Automated payment execution and transaction creation
-
 #### Advanced Scheduled Payment Features
 - ⏳ **Notification System**: Payment reminders and due date alerts
 - ⏳ **Payment Templates**: Reusable payment configurations
 - ⏳ **Batch Processing**: Bulk payment operations
 - ⏳ **Calendar Integration**: Payment scheduling with calendar views
+- ⏳ **Automated Payment Execution**: Background processing of due payments
+- ⏳ **Payment Analytics**: Advanced reporting and insights
 
 ### 📁 Project Structure
 
