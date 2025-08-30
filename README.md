@@ -205,10 +205,13 @@ Every payment execution is tracked with:
 
 #### Scheduled Payments
 - GET /scheduled-payments: List scheduled payments with filtering and search
-- POST /scheduled-payments: Create new scheduled payment
+- POST /scheduled-payments: Create new scheduled payment with schedule/debt configuration
 - GET /scheduled-payments/{id}: Get detailed scheduled payment information
 - PUT /scheduled-payments/{id}: Update scheduled payment
 - DELETE /scheduled-payments/{id}: Delete scheduled payment
+- GET /scheduled-payments/upcoming: Get upcoming payments grouped by time period
+- GET /scheduled-payments/notifications: Get payment notifications and summary
+- POST /scheduled-payments/{id}/execute: Execute a payment manually (creates transaction)
 
 ### Dashboard Features
 
@@ -249,10 +252,30 @@ The scheduled payments system is now fully implemented at both the database and 
 
 **API Endpoints**:
 - GET /scheduled-payments - List scheduled payments with filtering and search
-- POST /scheduled-payments - Create new scheduled payment
+- POST /scheduled-payments - Create new scheduled payment with schedule/debt configuration
 - GET /scheduled-payments/{id} - Get detailed scheduled payment information
 - PUT /scheduled-payments/{id} - Update scheduled payment
 - DELETE /scheduled-payments/{id} - Delete scheduled payment
+- GET /scheduled-payments/upcoming - Get upcoming payments grouped by time period
+- GET /scheduled-payments/notifications - Get payment notifications and summary
+- POST /scheduled-payments/{id}/execute - Execute a payment manually (creates transaction)
+
+**Key Features**:
+- **Manual Payment Execution**: All payments require manual confirmation (no auto-processing)
+- **Transaction Integration**: Executing a payment creates a Transaction and updates account balance
+- **Payment History Tracking**: Complete audit trail of all payment attempts and results
+- **Smart Notifications**: Get overdue, due today, and upcoming payment alerts
+- **Recurring Payments**: Configure frequency, intervals, and automatic scheduling
+- **Debt Management**: Track installments, remaining amounts, and payment progress
+- **Advanced Filtering**: Filter by status, payment type, account, category, and search terms
+
+**Payment Execution Flow**:
+1. User views upcoming/overdue payments via `/notifications` or `/upcoming`
+2. User manually executes payment via `/execute` endpoint
+3. System creates Transaction, updates account balance, and records payment history
+4. For recurring payments: automatically calculates next payment date
+5. For debt payments: updates remaining balance and installment count
+6. For one-time payments: marks as completed
 
 **Available Features**:
 - Recurring payment scheduling (daily, weekly, monthly, yearly)
@@ -262,12 +285,14 @@ The scheduled payments system is now fully implemented at both the database and 
 - Flexible metadata storage for payment details
 - Advanced filtering by status, payment type, account, and category
 - Search functionality by name and description
+- Payment notifications and reminders
+- Manual payment execution with transaction creation
 
-**Status**: ✅ **Fully Implemented** - Backend and API complete
+**Status**: ✅ **Fully Implemented** - Backend, API, and payment execution complete
 
 **Usage Example**:
 ```php
-// Create a recurring subscription payment
+// 1. Create a recurring Netflix subscription
 $payment = ScheduledPayment::create([
     'name' => 'Netflix Premium',
     'payment_type' => PaymentType::Recurring,
@@ -278,12 +303,75 @@ $payment = ScheduledPayment::create([
     'category_id' => $category->id
 ]);
 
-// Set up monthly recurring schedule
+// 2. Configure monthly recurring schedule
 $payment->paymentSchedule()->create([
     'frequency' => PaymentFrequency::Monthly,
     'interval' => 1,
-    'auto_process' => true
+    'day_of_month' => 15, // 15th of each month
+    'auto_process' => false, // Manual only
+    'days_before_notification' => 3, // Notify 3 days before
 ]);
+
+// 3. Execute payment manually (creates transaction)
+POST /api/scheduled-payments/{id}/execute
+{
+    "amount": 35.90,
+    "notes": "Netflix payment for December"
+}
+
+// 4. Get notifications
+GET /api/scheduled-payments/notifications
+// Returns overdue, due today, and upcoming payments
+```
+
+**API Request Examples**:
+
+*Create Recurring Payment:*
+```json
+POST /api/scheduled-payments
+{
+    "name": "Netflix Premium",
+    "payment_type": "recurring",
+    "amount": 35.90,
+    "account_id": 1,
+    "category_id": 2,
+    "start_date": "2025-08-30",
+    "schedule": {
+        "frequency": "monthly",
+        "interval": 1,
+        "day_of_month": 15,
+        "days_before_notification": 3
+    }
+}
+```
+
+*Create Debt Payment:*
+```json
+POST /api/scheduled-payments
+{
+    "name": "Credit Card Payment",
+    "payment_type": "debt",
+    "amount": 200.00,
+    "account_id": 1,
+    "category_id": 3,
+    "start_date": "2025-08-30",
+    "debt": {
+        "original_amount": 2000.00,
+        "total_installments": 10,
+        "installment_amount": 200.00,
+        "creditor": "VISA Bank",
+        "reference_number": "CC-12345"
+    }
+}
+```
+
+*Execute Payment:*
+```json
+POST /api/scheduled-payments/1/execute
+{
+    "amount": 35.90,
+    "notes": "Monthly Netflix payment"
+}
 ```
 
 ## Implementation Status
