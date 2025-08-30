@@ -1,6 +1,6 @@
 # Wallet v3
 
-A personal finance system that helps you track your accounts, transactions, and categories.
+This application is a robust personal finance management system designed to support multi-account and multi-currency operations. It provides comprehensive tools for transaction tracking, category management, financial reporting, and data export. A key feature is the Scheduled Payments System, which enables precise management of recurring payments, debt installments, and one-time obligations, offering flexible scheduling, detailed payment history, and status monitoring to ensure accurate financial planning and control.
 
 ## Features
 
