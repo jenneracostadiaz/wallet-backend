@@ -30,6 +30,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource('transactions', TransactionController::class)
         ->except(['create', 'edit']);
     
+    // Scheduled payments - specific routes MUST come before resource routes
+    Route::get('scheduled-payments/upcoming', [ScheduledPaymentController::class, 'upcomingPayments']);
+    Route::get('scheduled-payments/notifications', [ScheduledPaymentController::class, 'notifications']);
+    Route::post('scheduled-payments/{scheduled_payment}/execute', [ScheduledPaymentController::class, 'executePayment']);
     Route::resource('scheduled-payments', ScheduledPaymentController::class)
         ->except(['create', 'edit']);
 
