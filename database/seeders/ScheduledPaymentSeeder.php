@@ -27,7 +27,7 @@ class ScheduledPaymentSeeder extends Seeder
     public function run(): void
     {
         // Verificar que existan usuarios y cuentas
-        $users = User::all();
+        $users = User::with(['accounts', 'categories'])->get();
         if ($users->isEmpty()) {
             $this->command->error('No hay usuarios en la base de datos. Ejecuta primero UserSeeder.');
             return;
