@@ -33,6 +33,23 @@ class StoreScheduledPaymentRequest extends FormRequest
             'category_id' => 'nullable|exists:categories,id',
             'metadata' => 'nullable|array',
             'order' => 'nullable|integer|min:0',
+            
+            // PaymentSchedule fields (para pagos recurrentes)
+            'schedule.frequency' => 'required_if:payment_type,recurring|nullable|string',
+            'schedule.interval' => 'nullable|integer|min:1',
+            'schedule.day_of_month' => 'nullable|integer|min:1|max:31',
+            'schedule.day_of_week' => 'nullable|string|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            'schedule.max_occurrences' => 'nullable|integer|min:1',
+            'schedule.days_before_notification' => 'nullable|integer|min:0|max:30',
+            
+            // DebtDetail fields (para deudas)
+            'debt.original_amount' => 'required_if:payment_type,debt|nullable|numeric|min:0.01',
+            'debt.total_installments' => 'nullable|integer|min:1',
+            'debt.installment_amount' => 'nullable|numeric|min:0.01',
+            'debt.interest_rate' => 'nullable|numeric|min:0|max:100',
+            'debt.creditor' => 'nullable|string|max:255',
+            'debt.reference_number' => 'nullable|string|max:100',
+            'debt.due_date' => 'nullable|date',
         ];
     }
 
@@ -52,6 +69,21 @@ class StoreScheduledPaymentRequest extends FormRequest
             'account_id.required' => 'La cuenta es obligatoria.',
             'account_id.exists' => 'La cuenta seleccionada no existe.',
             'category_id.exists' => 'La categoría seleccionada no existe.',
+            
+            // Mensajes para schedule
+            'schedule.frequency.required_if' => 'La frecuencia es obligatoria para pagos recurrentes.',
+            'schedule.interval.min' => 'El intervalo debe ser mayor a 0.',
+            'schedule.day_of_month.min' => 'El día del mes debe estar entre 1 y 31.',
+            'schedule.day_of_month.max' => 'El día del mes debe estar entre 1 y 31.',
+            'schedule.max_occurrences.min' => 'El número máximo de ocurrencias debe ser mayor a 0.',
+            'schedule.days_before_notification.max' => 'Los días de notificación no pueden ser más de 30.',
+            
+            // Mensajes para debt
+            'debt.original_amount.required_if' => 'El monto original es obligatorio para deudas.',
+            'debt.original_amount.min' => 'El monto original debe ser mayor a 0.',
+            'debt.total_installments.min' => 'El número de cuotas debe ser mayor a 0.',
+            'debt.installment_amount.min' => 'El monto de la cuota debe ser mayor a 0.',
+            'debt.interest_rate.max' => 'La tasa de interés no puede ser mayor a 100%.',
         ];
     }
 
