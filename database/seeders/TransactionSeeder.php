@@ -13,8 +13,11 @@ class TransactionSeeder extends Seeder
      */
     public function run(): void
     {
-        $users = User::all();
+        $users = User::with(['accounts', 'categories'])->get();
         foreach ($users as $user) {
+            if ($user->accounts->isEmpty() || $user->categories->isEmpty()) {
+                continue;
+            }
             Transaction::factory()
                 ->count(50)
                 ->create([
