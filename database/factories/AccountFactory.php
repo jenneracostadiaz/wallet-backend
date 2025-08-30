@@ -24,7 +24,7 @@ class AccountFactory extends Factory
             'name' => $this->faker->word,
             'type' => $this->faker->randomElement(AccountType::cases()),
             'balance' => $this->faker->randomFloat(2, 0, 10000),
-            'currency_id' => Currency::factory(),
+            'currency_id' => Currency::query()->inRandomOrder()->first()->id,
             'user_id' => User::factory(),
             'description' => $this->faker->sentence,
             'color' => $this->faker->hexColor,
