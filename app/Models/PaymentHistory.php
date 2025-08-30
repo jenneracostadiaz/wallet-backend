@@ -50,8 +50,8 @@ class PaymentHistory extends Model
     ];
 
     protected $casts = [
-        'amount' => 'decimal:2',
-        'planned_amount' => 'decimal:2',
+        'amount' => 'float',
+        'planned_amount' => 'float',
         'status' => PaymentHistoryStatus::class,
         'scheduled_date' => 'datetime',
         'processed_date' => 'datetime',

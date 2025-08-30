@@ -25,9 +25,9 @@ class TransactionFactory extends Factory
             'description' => $this->faker->sentence(),
             'date' => $this->faker->dateTimeThisYear(),
             'type' => $this->faker->randomElement(['income', 'expense']),
-            'account_id' => Account::query()->inRandomOrder()->first()->id,
-            'category_id' => Category::query()->inRandomOrder()->first()->id,
-            'user_id' => User::query()->inRandomOrder()->first()->id,
+            'account_id' => Account::factory(),
+            'category_id' => Category::factory(),
+            'user_id' => User::factory(),
         ];
     }
 }

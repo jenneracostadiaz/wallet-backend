@@ -20,13 +20,13 @@ class DebtDetailFactory extends Factory
      */
     public function definition(): array
     {
-        $originalAmount = $this->faker->randomFloat(2, 1000, 50000);
-        $paidAmount = $this->faker->randomFloat(2, 0, $originalAmount * 0.8);
-        $remainingAmount = $originalAmount - $paidAmount;
+        $originalAmount = round($this->faker->randomFloat(2, 1000, 50000), 2);
+        $paidAmount = round($this->faker->randomFloat(2, 0, $originalAmount * 0.8), 2);
+        $remainingAmount = round($originalAmount - $paidAmount, 2);
         
         $totalInstallments = $this->faker->randomElement([1, 3, 6, 12, 18, 24, 36, 48]);
         $paidInstallments = $this->faker->numberBetween(0, min($totalInstallments - 1, 10));
-        $installmentAmount = $totalInstallments > 1 ? $originalAmount / $totalInstallments : $originalAmount;
+        $installmentAmount = $totalInstallments > 1 ? round($originalAmount / $totalInstallments, 2) : $originalAmount;
 
         return [
             'scheduled_payment_id' => ScheduledPayment::factory(),
@@ -63,12 +63,12 @@ class DebtDetailFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             $originalAmount = $attributes['original_amount'];
-            $paidAmount = $this->faker->randomFloat(2, $originalAmount * 0.1, $originalAmount * 0.7);
+            $paidAmount = round($this->faker->randomFloat(2, $originalAmount * 0.1, $originalAmount * 0.7), 2);
             $paidInstallments = $this->faker->numberBetween(1, $attributes['total_installments'] - 1);
             
             return [
                 'paid_amount' => $paidAmount,
-                'remaining_amount' => $originalAmount - $paidAmount,
+                'remaining_amount' => round($originalAmount - $paidAmount, 2),
                 'paid_installments' => $paidInstallments,
             ];
         });
@@ -215,6 +215,17 @@ class DebtDetailFactory extends Factory
             'Cooperativa de Ahorro',
             'Caja Municipal',
             'Prestamista Particular',
+        ]);
+    }
+
+    /**
+     * Estado para deudas con información de acreedor
+     */
+    public function withCreditor(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'creditor' => $this->getCreditorName(),
+            'reference_number' => $this->faker->numerify('REF-########'),
         ]);
     }
 }

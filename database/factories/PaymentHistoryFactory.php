@@ -48,14 +48,19 @@ class PaymentHistoryFactory extends Factory
      */
     public function paid(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'status' => PaymentHistoryStatus::Paid,
-            'processed_date' => $this->faker->dateTimeBetween($attributes['scheduled_date'], 'now'),
-            'payment_method' => $this->faker->randomElement(['transferencia', 'tarjeta_debito', 'tarjeta_credito', 'efectivo']),
-            'reference_number' => $this->faker->numerify('PAY-########'),
-            'transaction_id' => Transaction::factory(),
-            'failure_reason' => null,
-        ]);
+        return $this->state(function (array $attributes) {
+            $scheduledDate = \Carbon\Carbon::parse($attributes['scheduled_date']);
+            $processedDate = $scheduledDate->isFuture() ? null : $this->faker->dateTimeBetween($attributes['scheduled_date'], 'now');
+            
+            return [
+                'status' => PaymentHistoryStatus::Paid,
+                'processed_date' => $processedDate,
+                'payment_method' => $this->faker->randomElement(['transferencia', 'tarjeta_debito', 'tarjeta_credito', 'efectivo']),
+                'reference_number' => $this->faker->numerify('PAY-########'),
+                'transaction_id' => Transaction::factory(),
+                'failure_reason' => null,
+            ];
+        });
     }
 
     public function pending(): static
@@ -72,42 +77,52 @@ class PaymentHistoryFactory extends Factory
 
     public function failed(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'status' => PaymentHistoryStatus::Failed,
-            'amount' => 0,
-            'processed_date' => $this->faker->dateTimeBetween($attributes['scheduled_date'], 'now'),
-            'payment_method' => null,
-            'reference_number' => null,
-            'transaction_id' => null,
-            'failure_reason' => $this->faker->randomElement([
-                'Saldo insuficiente en la cuenta',
-                'Cuenta bloqueada temporalmente',
-                'Error en el sistema bancario',
-                'Tarjeta vencida',
-                'Límite de transacciones excedido',
-                'Cuenta de destino no válida',
-                'Error de conectividad',
-            ]),
-        ]);
+        return $this->state(function (array $attributes) {
+            $scheduledDate = \Carbon\Carbon::parse($attributes['scheduled_date']);
+            $processedDate = $scheduledDate->isFuture() ? null : $this->faker->dateTimeBetween($attributes['scheduled_date'], 'now');
+            
+            return [
+                'status' => PaymentHistoryStatus::Failed,
+                'amount' => 0,
+                'processed_date' => $processedDate,
+                'payment_method' => null,
+                'reference_number' => null,
+                'transaction_id' => null,
+                'failure_reason' => $this->faker->randomElement([
+                    'Saldo insuficiente en la cuenta',
+                    'Cuenta bloqueada temporalmente',
+                    'Error en el sistema bancario',
+                    'Tarjeta vencida',
+                    'Límite de transacciones excedido',
+                    'Cuenta de destino no válida',
+                    'Error de conectividad',
+                ]),
+            ];
+        });
     }
 
     public function skipped(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'status' => PaymentHistoryStatus::Skipped,
-            'amount' => 0,
-            'processed_date' => $this->faker->dateTimeBetween($attributes['scheduled_date'], 'now'),
-            'payment_method' => null,
-            'reference_number' => null,
-            'transaction_id' => null,
-            'failure_reason' => null,
-            'notes' => $this->faker->randomElement([
-                'Omitido por falta de fondos',
-                'Pago pospuesto por el usuario',
-                'Servicio suspendido temporalmente',
-                'Cambio en las condiciones del pago',
-            ]),
-        ]);
+        return $this->state(function (array $attributes) {
+            $scheduledDate = \Carbon\Carbon::parse($attributes['scheduled_date']);
+            $processedDate = $scheduledDate->isFuture() ? null : $this->faker->dateTimeBetween($attributes['scheduled_date'], 'now');
+            
+            return [
+                'status' => PaymentHistoryStatus::Skipped,
+                'amount' => 0,
+                'processed_date' => $processedDate,
+                'payment_method' => null,
+                'reference_number' => null,
+                'transaction_id' => null,
+                'failure_reason' => null,
+                'notes' => $this->faker->randomElement([
+                    'Omitido por falta de fondos',
+                    'Pago pospuesto por el usuario',
+                    'Servicio suspendido temporalmente',
+                    'Cambio en las condiciones del pago',
+                ]),
+            ];
+        });
     }
 
     public function partial(): static
@@ -115,11 +130,13 @@ class PaymentHistoryFactory extends Factory
         return $this->state(function (array $attributes) {
             $plannedAmount = $attributes['planned_amount'];
             $partialAmount = $this->faker->randomFloat(2, $plannedAmount * 0.2, $plannedAmount * 0.8);
+            $scheduledDate = \Carbon\Carbon::parse($attributes['scheduled_date']);
+            $processedDate = $scheduledDate->isFuture() ? null : $this->faker->dateTimeBetween($attributes['scheduled_date'], 'now');
             
             return [
                 'status' => PaymentHistoryStatus::Partial,
                 'amount' => $partialAmount,
-                'processed_date' => $this->faker->dateTimeBetween($attributes['scheduled_date'], 'now'),
+                'processed_date' => $processedDate,
                 'payment_method' => $this->faker->randomElement(['transferencia', 'tarjeta_debito']),
                 'reference_number' => $this->faker->numerify('PART-########'),
                 'transaction_id' => Transaction::factory(),
@@ -127,6 +144,17 @@ class PaymentHistoryFactory extends Factory
                 'notes' => 'Pago parcial - pendiente completar saldo restante',
             ];
         });
+    }
+
+    /**
+     * Set specific transaction
+     */
+    public function withTransaction(?Transaction $transaction = null): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'transaction_id' => $transaction?->id ?? Transaction::factory(),
+            'status' => PaymentHistoryStatus::Paid, // Only paid payments have transactions
+        ]);
     }
 
     /**
@@ -165,14 +193,6 @@ class PaymentHistoryFactory extends Factory
         ]);
     }
 
-    public function withTransaction(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'status' => PaymentHistoryStatus::Paid,
-            'transaction_id' => Transaction::factory(),
-        ]);
-    }
-
     /**
      * Métodos auxiliares
      */
@@ -194,9 +214,15 @@ class PaymentHistoryFactory extends Factory
         }
 
         $scheduledCarbon = \Carbon\Carbon::instance($scheduledDate);
+        $endDate = $scheduledCarbon->copy()->addDays(5);
+        
+        // Si la fecha programada es en el futuro, no debería estar procesada
+        if ($scheduledCarbon->isFuture()) {
+            return null;
+        }
         
         return match ($status) {
-            PaymentHistoryStatus::Paid => $this->faker->dateTimeBetween($scheduledDate, $scheduledCarbon->copy()->addDays(5)),
+            PaymentHistoryStatus::Paid => $this->faker->dateTimeBetween($scheduledDate, $endDate),
             PaymentHistoryStatus::Failed => $this->faker->dateTimeBetween($scheduledDate, $scheduledCarbon->copy()->addDays(2)),
             PaymentHistoryStatus::Skipped => $this->faker->dateTimeBetween($scheduledDate, $scheduledCarbon->copy()->addDays(1)),
             PaymentHistoryStatus::Partial => $this->faker->dateTimeBetween($scheduledDate, $scheduledCarbon->copy()->addDays(3)),
@@ -228,11 +254,11 @@ class PaymentHistoryFactory extends Factory
         }
 
         $prefixes = [
-            PaymentHistoryStatus::Paid => 'PAY',
-            PaymentHistoryStatus::Partial => 'PART',
+            PaymentHistoryStatus::Paid->value => 'PAY',
+            PaymentHistoryStatus::Partial->value => 'PART',
         ];
 
-        $prefix = $prefixes[$status] ?? 'TXN';
+        $prefix = $prefixes[$status->value] ?? 'TXN';
         
         return $prefix . '-' . $this->faker->numerify('########');
     }
@@ -240,33 +266,33 @@ class PaymentHistoryFactory extends Factory
     private function getNotes(PaymentHistoryStatus $status): ?string
     {
         $notes = [
-            PaymentHistoryStatus::Paid => [
+            PaymentHistoryStatus::Paid->value => [
                 'Pago procesado exitosamente',
                 'Transacción completada sin problemas',
                 'Débito automático ejecutado',
                 null, null, null, // Más probabilidad de null
             ],
-            PaymentHistoryStatus::Pending => [
+            PaymentHistoryStatus::Pending->value => [
                 'Esperando procesamiento',
                 'En cola de pagos',
                 null, null,
             ],
-            PaymentHistoryStatus::Failed => [
+            PaymentHistoryStatus::Failed->value => [
                 null, null,
             ],
-            PaymentHistoryStatus::Skipped => [
+            PaymentHistoryStatus::Skipped->value => [
                 'Omitido por el usuario',
                 'Pospuesto hasta próximo periodo',
                 'Suspendido temporalmente',
             ],
-            PaymentHistoryStatus::Partial => [
+            PaymentHistoryStatus::Partial->value => [
                 'Pago parcial realizado',
                 'Pendiente completar saldo restante',
                 'Abono parcial aplicado',
             ],
         ];
 
-        return $this->faker->optional(0.3)->randomElement($notes[$status] ?? [null]);
+        return $this->faker->optional(0.3)->randomElement($notes[$status->value] ?? [null]);
     }
 
     private function getFailureReason(PaymentHistoryStatus $status): ?string

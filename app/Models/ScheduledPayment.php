@@ -57,7 +57,7 @@ class ScheduledPayment extends Model
     protected $casts = [
         'payment_type' => PaymentType::class,
         'status' => PaymentStatus::class,
-        'amount' => 'decimal:2',
+        'amount' => 'float',
         'start_date' => 'datetime',
         'next_payment_date' => 'datetime',
         'end_date' => 'datetime',

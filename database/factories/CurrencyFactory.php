@@ -17,11 +17,10 @@ class CurrencyFactory extends Factory
      */
     public function definition(): array
     {
-
         return [
-            'code' => fake()->randomElement(['USD', 'EUR', 'GBP', 'JPY', 'CNY']),
-            'name' => fake()->word(),
-            'symbol' => fake()->randomElement(['$', '€', 'S/', '£', '¥']),
+            'code' => $this->faker->unique()->randomElement(['PEN', 'USD', 'EUR', 'GBP', 'JPY', 'CNY', 'CAD', 'AUD', 'CHF', 'MXN', 'BRL', 'CLP', 'COP', 'ARS']),
+            'name' => $this->faker->word(),
+            'symbol' => $this->faker->randomElement(['S/', '$', '€', '£', '¥', 'C$', 'A$', 'CHF', 'R$']),
             'decimal_places' => 2,
         ];
     }

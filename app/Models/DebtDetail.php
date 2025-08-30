@@ -47,12 +47,12 @@ class DebtDetail extends Model
     ];
 
     protected $casts = [
-        'original_amount' => 'decimal:2',
-        'remaining_amount' => 'decimal:2',
-        'paid_amount' => 'decimal:2',
-        'installment_amount' => 'decimal:2',
-        'interest_rate' => 'decimal:2',
-        'late_fee' => 'decimal:2',
+        'original_amount' => 'float',
+        'remaining_amount' => 'float',
+        'paid_amount' => 'float',
+        'installment_amount' => 'float',
+        'interest_rate' => 'float',
+        'late_fee' => 'float',
         'due_date' => 'datetime',
         'total_installments' => 'integer',
         'paid_installments' => 'integer',

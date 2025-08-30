@@ -76,6 +76,7 @@ class ScheduledPaymentFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'status' => PaymentStatus::Completed,
+            'next_payment_date' => null, // Completed payments shouldn't have next payment dates
         ]);
     }
 
@@ -128,6 +129,7 @@ class ScheduledPaymentFactory extends Factory
             ]),
             'amount' => $this->faker->randomFloat(2, 45.00, 850.00),
             'next_payment_date' => $this->faker->dateTimeBetween('now', '+3 months'),
+            'end_date' => $this->faker->dateTimeBetween('+1 day', '+3 months'), // Ensure end_date is set for one-time payments
         ]);
     }
 
