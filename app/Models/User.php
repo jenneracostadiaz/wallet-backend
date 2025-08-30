@@ -53,4 +53,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Transaction::class)->orderBy('date', 'desc');
     }
+
+    public function scheduledPayments(): HasMany
+    {
+        return $this->hasMany(ScheduledPayment::class)->orderBy('order');
+    }
 }
