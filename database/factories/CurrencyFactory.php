@@ -22,6 +22,7 @@ class CurrencyFactory extends Factory
             'name' => $this->faker->word(),
             'symbol' => $this->faker->randomElement(['S/', '$', '€', '£', '¥', 'C$', 'A$', 'CHF', 'R$']),
             'decimal_places' => 2,
+            'exchange_rate_to_pen' => 1.0000,
         ];
     }
 }

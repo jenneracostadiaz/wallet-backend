@@ -48,14 +48,15 @@ describe('getCurrentTotalBalance', function () {
 
         $result = $this->dashboardService->getCurrentTotalBalance();
 
-        expect($result['total_balance'])->toBe([
+        // Total balance should now be in PEN (base currency)
+        expect($result['total_balance'])->toMatchArray([
             'currency' => [
-                'code' => 'USD',
-                'symbol' => '$',
-                'name' => $this->currency->name,
+                'code' => 'PEN',
+                'symbol' => 'S/',
+                'name' => 'Peruvian Sol',
             ],
-            'total' => '1,500.75',
         ])
+            ->and($result['total_balance']['total'])->toBe('1,500.75') // USD has exchange rate of 1.0 by default in factory
             ->and($result['balances_by_currency'])->toHaveCount(1)
             ->and($result['balances_by_currency'][0])
             ->toMatchArray([
@@ -65,6 +66,8 @@ describe('getCurrentTotalBalance', function () {
                     'name' => $this->currency->name,
                 ],
                 'total' => '1,500.75',
+                'total_in_pen' => '1,500.75',
+                'exchange_rate' => 1.0,
             ]);
     });
 
@@ -86,14 +89,15 @@ describe('getCurrentTotalBalance', function () {
         $result = $this->dashboardService->getCurrentTotalBalance();
 
         expect($result['balances_by_currency'])->toHaveCount(2)
-            ->and($result['total_balance'])->toBe([
+            ->and($result['total_balance'])->toMatchArray([
                 'currency' => [
-                    'code' => 'USD',
-                    'symbol' => '$',
-                    'name' => $this->currency->name,
+                    'code' => 'PEN',
+                    'symbol' => 'S/',
+                    'name' => 'Peruvian Sol',
                 ],
-                'total' => '1,000.00',
-            ]);
+            ])
+            // Total should be 1000 (USD at rate 1.0) + 800 (EUR at rate 1.0) = 1800 PEN
+            ->and($result['total_balance']['total'])->toBe('1,800.00');
     });
 
     it('excludes other users accounts', function () {
@@ -111,14 +115,14 @@ describe('getCurrentTotalBalance', function () {
 
         $result = $this->dashboardService->getCurrentTotalBalance();
 
-        expect($result['total_balance'])->toBe([
+        expect($result['total_balance'])->toMatchArray([
             'currency' => [
-                'code' => 'USD',
-                'symbol' => '$',
-                'name' => $this->currency->name,
+                'code' => 'PEN',
+                'symbol' => 'S/',
+                'name' => 'Peruvian Sol',
             ],
-            'total' => '1,000.00',
         ])
+            ->and($result['total_balance']['total'])->toBe('1,000.00')
             ->and($result['balances_by_currency'])->toHaveCount(1)
             ->and($result['balances_by_currency'][0])
             ->toMatchArray([
@@ -128,6 +132,8 @@ describe('getCurrentTotalBalance', function () {
                     'name' => $this->currency->name,
                 ],
                 'total' => '1,000.00',
+                'total_in_pen' => '1,000.00',
+                'exchange_rate' => 1.0,
             ])
             ->and($result['balances_by_currency'][0]['accounts_count'])->toBe(1);
     });

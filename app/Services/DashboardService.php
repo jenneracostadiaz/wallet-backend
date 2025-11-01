@@ -18,12 +18,24 @@ readonly class DashboardService
             ->get()
             ->groupBy('currency.code');
 
+        // If no accounts, return empty
+        if ($accounts->isEmpty()) {
+            return [
+                'total_balance' => 0,
+                'balances_by_currency' => [],
+                'accounts_summary' => $this->getAccountsSummary(),
+            ];
+        }
+
         $balances = [];
-        $totalInPrimaryCurrency = 0;
+        $totalInPen = 0;
 
         foreach ($accounts as $accountsGroup) {
             $currency = $accountsGroup->first()->currency;
             $total = $accountsGroup->sum('balance');
+
+            // Convert to PEN using exchange rate
+            $totalInPen += $total * $currency->exchange_rate_to_pen;
 
             $balances[] = [
                 'currency' => [
@@ -32,23 +44,32 @@ readonly class DashboardService
                     'name' => $currency->name,
                 ],
                 'total' => number_format($total, $currency->decimal_places),
+                'total_in_pen' => number_format($total * $currency->exchange_rate_to_pen, 2),
+                'exchange_rate' => $currency->exchange_rate_to_pen,
                 'accounts_count' => $accountsGroup->count(),
             ];
-
-            if (empty($totalInPrimaryCurrency)) {
-                $totalInPrimaryCurrency = [
-                    'currency' => [
-                        'code' => $currency->code,
-                        'symbol' => $currency->symbol,
-                        'name' => $currency->name,
-                    ],
-                    'total' => number_format($total, $currency->decimal_places),
-                ];
-            }
         }
 
+        // Get PEN currency for displaying total, or create it if it doesn't exist
+        $penCurrency = \App\Models\Currency::firstOrCreate(
+            ['code' => 'PEN'],
+            [
+                'name' => 'Peruvian Sol',
+                'symbol' => 'S/',
+                'decimal_places' => 2,
+                'exchange_rate_to_pen' => 1.0000,
+            ]
+        );
+
         return [
-            'total_balance' => $totalInPrimaryCurrency,
+            'total_balance' => [
+                'currency' => [
+                    'code' => $penCurrency->code,
+                    'symbol' => $penCurrency->symbol,
+                    'name' => $penCurrency->name,
+                ],
+                'total' => number_format($totalInPen, 2),
+            ],
             'balances_by_currency' => $balances,
             'accounts_summary' => $this->getAccountsSummary(),
         ];

@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $name
  * @property string $symbol
  * @property int $decimal_places
+ * @property float $exchange_rate_to_pen
  */
 class Currency extends Model
 {
@@ -23,11 +24,13 @@ class Currency extends Model
         'name',
         'symbol',
         'decimal_places',
+        'exchange_rate_to_pen',
     ];
 
     public $timestamps = false;
 
     protected $casts = [
         'decimal_places' => 'integer',
+        'exchange_rate_to_pen' => 'float',
     ];
 }
