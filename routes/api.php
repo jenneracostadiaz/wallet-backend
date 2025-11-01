@@ -29,7 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('transactions/export-csv', [TransactionController::class, 'exportCsv']);
     Route::resource('transactions', TransactionController::class)
         ->except(['create', 'edit']);
-    
+
     // Scheduled payments - specific routes MUST come before resource routes
     Route::get('scheduled-payments/upcoming', [ScheduledPaymentController::class, 'upcomingPayments']);
     Route::get('scheduled-payments/notifications', [ScheduledPaymentController::class, 'notifications']);
@@ -41,7 +41,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [DashboardController::class, 'index']);
         Route::get('/balance', [DashboardController::class, 'balance']);
         Route::get('/monthly-report', [DashboardController::class, 'monthlyReport']);
-        Route::get('/latest-transactions', [DashboardController::class, 'latestTransactions']);
         Route::get('/monthly-comparison', [DashboardController::class, 'monthlyComparison']);
         Route::get('/quick-stats', [DashboardController::class, 'quickStats']);
     });

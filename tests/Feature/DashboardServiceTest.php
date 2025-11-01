@@ -212,7 +212,7 @@ describe('getMonthlyBasicSummary', function () {
             ->and($result['expenses_by_category'][0])
             ->toMatchArray([
                 'category' => 'Food',
-                'amount' => 500,
+                'amount' => '500.00',
                 'count' => 1,
                 'percentage' => 100.0,
             ]);
@@ -287,143 +287,53 @@ describe('getMonthlyBasicSummary', function () {
 
         expect($result['summary'])
             ->toMatchArray([
-                'total_income' => 0,
-                'total_expenses' => 0,
-                'total_transfers' => 0,
-                'net_income' => 0,
+                'total_income' => '0.00',
+                'total_expenses' => '0.00',
+                'total_transfers' => '0.00',
+                'net_income' => '0.00',
                 'transactions_count' => 0,
             ])
-            ->and($result['expenses_by_category'])->toBeEmpty();
-
-    });
-});
-
-describe('getLatestTransactions', function () {
-    beforeEach(function () {
-        $this->account = Account::factory()->create([
-            'user_id' => $this->user->id,
-            'currency_id' => $this->currency->id,
-            'name' => 'Main Account',
-        ]);
-
-        $this->category = Category::factory()->create([
-            'user_id' => $this->user->id,
-            'name' => 'Food',
-            'icon' => 'food-icon',
-        ]);
+            ->and($result['expenses_by_category'])->toBeEmpty()
+            ->and($result['transactions'])->toBeEmpty();
     });
 
-    it('returns latest transactions in descending order', function () {
+    it('includes all transactions for the month', function () {
+        $currentMonth = Carbon::now()->startOfMonth();
+
         Transaction::factory()->create([
             'user_id' => $this->user->id,
             'account_id' => $this->account->id,
-            'category_id' => $this->category->id,
-            'amount' => 100,
-            'description' => 'Older transaction',
-            'date' => Carbon::now()->subDays(2),
-            'type' => 'expense',
+            'category_id' => $this->incomeCategory->id,
+            'amount' => 3000,
+            'type' => 'income',
+            'date' => $currentMonth->copy()->addDays(5),
+            'description' => 'Salary payment',
         ]);
 
         Transaction::factory()->create([
             'user_id' => $this->user->id,
             'account_id' => $this->account->id,
-            'category_id' => $this->category->id,
-            'amount' => 200,
-            'description' => 'Newer transaction',
-            'date' => Carbon::now()->subDay(),
-            'type' => 'expense',
-        ]);
-
-        $result = $this->dashboardService->getLatestTransactions(5);
-
-        expect($result)->toHaveCount(2)
-            ->and($result[0]['description'])->toBe('Newer transaction')
-            ->and($result[1]['description'])->toBe('Older transaction')
-            ->and($result[0]['amount'])->toBe('200.00');
-    });
-
-    it('respects the limit parameter', function () {
-        Transaction::factory()->count(15)->create([
-            'user_id' => $this->user->id,
-            'account_id' => $this->account->id,
-            'category_id' => $this->category->id,
-            'date' => Carbon::now(),
-        ]);
-
-        $result = $this->dashboardService->getLatestTransactions(5);
-
-        expect($result)->toHaveCount(5);
-    });
-
-    it('includes all required transaction data', function () {
-        $toAccount = Account::factory()->create([
-            'user_id' => $this->user->id,
-            'currency_id' => $this->currency->id,
-            'name' => 'Savings Account',
-        ]);
-
-        Transaction::factory()->create([
-            'user_id' => $this->user->id,
-            'account_id' => $this->account->id,
-            'to_account_id' => $toAccount->id,
-            'category_id' => $this->category->id,
+            'category_id' => $this->expenseCategory->id,
             'amount' => 500,
-            'description' => 'Transfer to savings',
-            'date' => Carbon::now(),
-            'type' => 'transfer',
+            'type' => 'expense',
+            'date' => $currentMonth->copy()->addDays(10),
+            'description' => 'Groceries',
         ]);
 
-        $result = $this->dashboardService->getLatestTransactions(1);
+        $result = $this->dashboardService->getMonthlyBasicSummary();
 
-        expect($result[0])
-            ->toHaveKeys([
-                'id', 'amount', 'description', 'date',
-                'type', 'account', 'category', 'to_account',
+        expect($result['transactions'])->toHaveCount(2)
+            ->and($result['transactions'][0])->toHaveKeys([
+                'id', 'type', 'amount', 'amount_in_pen', 'date',
+                'description', 'category', 'account', 'currency', 'to_account',
             ])
-            ->and($result[0]['account']['name'])->toBe('Main Account')
-            ->and($result[0]['category']['name'])->toBe('Food')
-            ->and($result[0]['to_account']['name'])->toBe('Savings Account');
-
-    });
-
-    it('excludes other users transactions', function () {
-        $otherAccount = Account::factory()->create([
-            'user_id' => $this->otherUser->id,
-            'currency_id' => $this->currency->id,
-        ]);
-
-        $otherCategory = Category::factory()->create([
-            'user_id' => $this->otherUser->id,
-        ]);
-
-        Transaction::factory()->create([
-            'user_id' => $this->user->id,
-            'account_id' => $this->account->id,
-            'category_id' => $this->category->id,
-            'amount' => 100,
-            'date' => Carbon::now(),
-        ]);
-
-        Transaction::factory()->create([
-            'user_id' => $this->otherUser->id,
-            'account_id' => $otherAccount->id,
-            'category_id' => $otherCategory->id,
-            'amount' => 200,
-            'date' => Carbon::now(),
-        ]);
-
-        $result = $this->dashboardService->getLatestTransactions();
-
-        expect($result)->toHaveCount(1)
-            ->and($result[0]['amount'])->toBe('100.00');
-    });
-
-    it('handles user with no transactions', function () {
-        $result = $this->dashboardService->getLatestTransactions();
-
-        expect($result)->toBeEmpty();
+            ->and($result['transactions'][0]['description'])->toBe('Groceries') // Latest first
+            ->and($result['transactions'][1]['description'])->toBe('Salary payment')
+            ->and($result['transactions'][0]['amount_in_pen'])->toBe('500.00')
+            ->and($result['transactions'][0]['currency']['code'])->toBe('USD');
     });
 });
+
 
 describe('getMonthlyComparison', function () {
     beforeEach(function () {
@@ -500,7 +410,6 @@ describe('getDashboardData', function () {
         expect($result)->toHaveKeys([
             'balance',
             'monthly_summary',
-            'latest_transactions',
             'monthly_comparison',
             'quick_stats',
         ])
@@ -508,6 +417,14 @@ describe('getDashboardData', function () {
                 'total_balance',
                 'balances_by_currency',
                 'accounts_summary',
+            ])
+            ->and($result['monthly_summary'])->toHaveKeys([
+                'period',
+                'currency',
+                'summary',
+                'transactions',
+                'expenses_by_category',
+                'daily_balance',
             ]);
 
     });

@@ -145,6 +145,42 @@ readonly class DashboardService
             'decimal_places' => $penCurrency->decimal_places,
         ];
 
+        // Format transactions for the month
+        $formattedTransactions = $transactions->map(function ($transaction) {
+            $amountInPen = $transaction->amount * $transaction->account->currency->exchange_rate_to_pen;
+
+            return [
+                'id' => $transaction->id,
+                'type' => $transaction->type,
+                'amount' => $transaction->amount,
+                'amount_in_pen' => number_format($amountInPen, 2),
+                'date' => $transaction->date->toDateTimeString(),
+                'description' => $transaction->description,
+                'category' => [
+                    'id' => $transaction->category->id,
+                    'name' => $transaction->category->name,
+                    'type' => $transaction->category->type,
+                    'icon' => $transaction->category->icon,
+                ],
+                'account' => [
+                    'id' => $transaction->account->id,
+                    'name' => $transaction->account->name,
+                    'type' => $transaction->account->type,
+                    'color' => $transaction->account->color,
+                ],
+                'currency' => [
+                    'code' => $transaction->account->currency->code,
+                    'symbol' => $transaction->account->currency->symbol,
+                ],
+                'to_account' => $transaction->toAccount ? [
+                    'id' => $transaction->toAccount->id,
+                    'name' => $transaction->toAccount->name,
+                    'type' => $transaction->toAccount->type,
+                    'color' => $transaction->toAccount->color,
+                ] : null,
+            ];
+        })->sortByDesc('date')->values();
+
         return [
             'period' => [
                 'month' => $date->format('Y-m'),
@@ -160,61 +196,13 @@ readonly class DashboardService
                 'net_income' => number_format($income - $expenses, 2),
                 'transactions_count' => $transactions->count(),
             ],
+            'transactions' => $formattedTransactions,
             'expenses_by_category' => $expensesByCategory->take(10)->map(function ($item) {
                 $item['amount'] = number_format($item['amount'], 2);
                 return $item;
             }),
             'daily_balance' => $this->getDailyBalanceForMonth($startOfMonth, $endOfMonth),
         ];
-    }
-
-    public function getLatestTransactions(int $limit = 10): array
-    {
-        $transactions = Transaction::forUser($this->userId)
-            ->withRelations()
-            ->orderBy('date', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->limit($limit)
-            ->get();
-
-        return $transactions->map(function ($transaction) {
-            return [
-                'id' => $transaction->id,
-                'type' => $transaction->type,
-                'amount' => $transaction->amount,
-                'date' => $transaction->date->toDateTimeString(),
-                'description' => $transaction->description,
-                'category_id' => $transaction->category_id,
-                'category' => [
-                    'id' => $transaction->category->id,
-                    'name' => $transaction->category->name,
-                    'type' => $transaction->category->type,
-                    'icon' => $transaction->category->icon,
-                ],
-                'account_id' => $transaction->account_id,
-                'account' => [
-                    'id' => $transaction->account->id,
-                    'name' => $transaction->account->name,
-                    'type' => $transaction->account->type,
-                    'balance' => number_format($transaction->account->balance, $transaction->account->currency->decimal_places),
-                    'color' => $transaction->account->color,
-                ],
-                'currency' => [
-                    'id' => $transaction->account->currency->id,
-                    'code' => $transaction->account->currency->code,
-                    'name' => $transaction->account->currency->name,
-                    'symbol' => $transaction->account->currency->symbol,
-                ],
-                'to_account_id' => $transaction->toAccount ? $transaction->toAccount->id : null,
-                'to_account' => $transaction->toAccount ? [
-                    'id' => $transaction->toAccount->id,
-                    'name' => $transaction->toAccount->name,
-                    'type' => $transaction->toAccount->type,
-                    'balance' => number_format($transaction->toAccount->balance, $transaction->toAccount->currency->decimal_places),
-                    'color' => $transaction->toAccount->color,
-                ] : null,
-            ];
-        })->toArray();
     }
 
     public function getMonthlyComparison(): array
@@ -257,7 +245,6 @@ readonly class DashboardService
         return [
             'balance' => $this->getCurrentTotalBalance(),
             'monthly_summary' => $this->getMonthlyBasicSummary(),
-            'latest_transactions' => $this->getLatestTransactions(),
             'monthly_comparison' => $this->getMonthlyComparison(),
             'quick_stats' => $this->getQuickStats(),
         ];
