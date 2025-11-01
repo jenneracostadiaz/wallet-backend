@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Account;
 use App\Models\Category;
+use App\Models\Currency;
 use App\Models\Transaction;
 use Carbon\Carbon;
 
@@ -51,7 +52,7 @@ readonly class DashboardService
         }
 
         // Get PEN currency for displaying total, or create it if it doesn't exist
-        $penCurrency = \App\Models\Currency::firstOrCreate(
+        $penCurrency = Currency::query()->firstOrCreate(
             ['code' => 'PEN'],
             [
                 'name' => 'Peruvian Sol',
@@ -86,17 +87,31 @@ readonly class DashboardService
             ->withRelations()
             ->get();
 
-        $income = $transactions->where('type', 'income')->sum('amount');
-        $expenses = $transactions->where('type', 'expense')->sum('amount');
-        $transfers = $transactions->where('type', 'transfer')->sum('amount');
+        // Convert all amounts to PEN using exchange rates
+        $income = $transactions->where('type', 'income')->sum(function ($transaction) {
+            return $transaction->amount * $transaction->account->currency->exchange_rate_to_pen;
+        });
 
+        $expenses = $transactions->where('type', 'expense')->sum(function ($transaction) {
+            return $transaction->amount * $transaction->account->currency->exchange_rate_to_pen;
+        });
+
+        $transfers = $transactions->where('type', 'transfer')->sum(function ($transaction) {
+            return $transaction->amount * $transaction->account->currency->exchange_rate_to_pen;
+        });
+
+        // Group expenses by category and convert to PEN
         $expensesByCategory = $transactions
             ->where('type', 'expense')
             ->groupBy('category.name')
             ->map(function ($items, $categoryName) {
+                $totalInPen = $items->sum(function ($transaction) {
+                    return $transaction->amount * $transaction->account->currency->exchange_rate_to_pen;
+                });
+
                 return [
                     'category' => $categoryName ?: 'Sin categoría',
-                    'amount' => $items->sum('amount'),
+                    'amount' => $totalInPen,
                     'count' => $items->count(),
                     'percentage' => 0,
                 ];
@@ -112,18 +127,23 @@ readonly class DashboardService
             });
         }
 
-        // Obtener moneda principal igual que en getCurrentTotalBalance
-        $accounts = Account::query()->where('user_id', $this->userId)
-            ->with('currency')
-            ->get();
-        $primaryCurrency = $accounts->first() ? $accounts->first()->currency : null;
-        $currencyArr = $primaryCurrency ? [
-            'code' => $primaryCurrency->code,
-            'symbol' => $primaryCurrency->symbol,
-            'name' => $primaryCurrency->name,
-            'decimal_places' => $primaryCurrency->decimal_places,
-        ] : null;
-        $decimals = $primaryCurrency ? $primaryCurrency->decimal_places : 2;
+        // Use PEN as the primary currency for summary
+        $penCurrency = Currency::query()->firstOrCreate(
+            ['code' => 'PEN'],
+            [
+                'name' => 'Peruvian Sol',
+                'symbol' => 'S/',
+                'decimal_places' => 2,
+                'exchange_rate_to_pen' => 1.0000,
+            ]
+        );
+
+        $currencyArr = [
+            'code' => $penCurrency->code,
+            'symbol' => $penCurrency->symbol,
+            'name' => $penCurrency->name,
+            'decimal_places' => $penCurrency->decimal_places,
+        ];
 
         return [
             'period' => [
@@ -134,13 +154,16 @@ readonly class DashboardService
             ],
             'currency' => $currencyArr,
             'summary' => [
-                'total_income' => number_format($income, $decimals),
-                'total_expenses' => number_format($expenses, $decimals),
-                'total_transfers' => number_format($transfers, $decimals),
-                'net_income' => number_format($income - $expenses, $decimals),
+                'total_income' => number_format($income, 2),
+                'total_expenses' => number_format($expenses, 2),
+                'total_transfers' => number_format($transfers, 2),
+                'net_income' => number_format($income - $expenses, 2),
                 'transactions_count' => $transactions->count(),
             ],
-            'expenses_by_category' => $expensesByCategory->take(10),
+            'expenses_by_category' => $expensesByCategory->take(10)->map(function ($item) {
+                $item['amount'] = number_format($item['amount'], 2);
+                return $item;
+            }),
             'daily_balance' => $this->getDailyBalanceForMonth($startOfMonth, $endOfMonth),
         ];
     }
@@ -265,15 +288,29 @@ readonly class DashboardService
 
     private function getDailyBalanceForMonth(Carbon $start, Carbon $end): array
     {
-        $dailyTransactions = Transaction::forUser($this->userId)
+        // Load transactions with currency relationships for conversion
+        $transactions = Transaction::forUser($this->userId)
             ->betweenDates($start, $end)
-            ->selectRaw('DATE(date) as transaction_date,
-                        SUM(CASE WHEN type = "income" THEN amount ELSE 0 END) as daily_income,
-                        SUM(CASE WHEN type = "expense" THEN amount ELSE 0 END) as daily_expenses')
-            ->groupBy('transaction_date')
-            ->orderBy('transaction_date')
-            ->get()
-            ->keyBy('transaction_date');
+            ->with(['account.currency'])
+            ->get();
+
+        // Group by date and convert to PEN
+        $dailyTransactions = $transactions->groupBy(function ($transaction) {
+            return $transaction->date->format('Y-m-d');
+        })->map(function ($dayTransactions) {
+            $income = $dayTransactions->where('type', 'income')->sum(function ($transaction) {
+                return $transaction->amount * $transaction->account->currency->exchange_rate_to_pen;
+            });
+
+            $expenses = $dayTransactions->where('type', 'expense')->sum(function ($transaction) {
+                return $transaction->amount * $transaction->account->currency->exchange_rate_to_pen;
+            });
+
+            return [
+                'daily_income' => $income,
+                'daily_expenses' => $expenses,
+            ];
+        });
 
         $dailyBalance = [];
         $currentDate = $start->copy();
@@ -284,9 +321,9 @@ readonly class DashboardService
 
             $dailyBalance[] = [
                 'date' => $dateStr,
-                'income' => $transaction->daily_income ?? 0,
-                'expenses' => $transaction->daily_expenses ?? 0,
-                'net' => ($transaction->daily_income ?? 0) - ($transaction->daily_expenses ?? 0),
+                'income' => $transaction['daily_income'] ?? 0,
+                'expenses' => $transaction['daily_expenses'] ?? 0,
+                'net' => ($transaction['daily_income'] ?? 0) - ($transaction['daily_expenses'] ?? 0),
             ];
 
             $currentDate->addDay();
